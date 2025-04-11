@@ -65,7 +65,7 @@ namespace API
             {
                 options.AddPolicy("CorsPolicy", builder =>
                 {
-                    builder.WithOrigins("http://localhost:5173")
+                    builder.WithOrigins("http://localhost:5173", "https://localhost:7289")
                            .AllowAnyMethod()
                            .AllowAnyHeader()
                            .AllowCredentials(); // Required for cookies

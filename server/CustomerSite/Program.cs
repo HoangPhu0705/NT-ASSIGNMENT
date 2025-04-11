@@ -9,13 +9,22 @@ namespace CustomerSite
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddHttpClient("BackendApi", client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration["BackendApi:BaseUrl"]);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                UseCookies = true,
+                CookieContainer = new System.Net.CookieContainer()
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

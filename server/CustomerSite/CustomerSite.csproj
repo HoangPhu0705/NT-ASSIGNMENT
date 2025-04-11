@@ -6,4 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\" />
+    <Folder Include="ViewComponents\" />
+    <Folder Include="wwwroot\js\" />
+  </ItemGroup>
+
 </Project>
