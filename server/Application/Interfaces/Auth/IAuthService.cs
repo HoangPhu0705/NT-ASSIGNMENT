@@ -1,5 +1,5 @@
-﻿using Application.DTOs.Auth;
-using Application.DTOs.Shared;
+﻿using SharedViewModels.Shared;
+using SharedViewModels.Auth;
 
 namespace Application.Interfaces.Auth
 {

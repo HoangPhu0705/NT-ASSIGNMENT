@@ -1,12 +1,18 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: [
-        "./Views/**/*.cshtml", // Scans MVC Views
+        './Pages/**/*.cshtml',
+        './Views/**/*.cshtml',
         "./wwwroot/**/*.html",
     ],
   theme: {
     extend: {},
   },
-  plugins: [],
+  plugins: [
+      require('daisyui'),
+  ], 
+    daisyui: {
+        themes: ["light"],
+    },
 }
 

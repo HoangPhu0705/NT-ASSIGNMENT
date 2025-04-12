@@ -1,9 +1,7 @@
-﻿using Application.DTOs.Auth;
-using Application.DTOs.Shared;
-using Application.Interfaces.Auth;
-using Microsoft.AspNetCore.Http;
+﻿using Application.Interfaces.Auth;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.WebSockets;
+using SharedViewModels.Auth;
+using SharedViewModels.Shared;
 
 namespace API.Controllers
 {
