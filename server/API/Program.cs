@@ -20,7 +20,6 @@ namespace API
         {
             Env.Load();
             var builder = WebApplication.CreateBuilder(args);
-            //Console.WriteLine($"JWT_KEY: {builder.Configuration["JWT_KEY"]}");
 
             //Register DBContext
             builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
