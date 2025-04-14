@@ -84,7 +84,6 @@ namespace Application.Services.Auth
                 LastName = request.LastName,
                 UserName = request.FirstName + request.LastName,
                 Email = request.Email,
-                Dob = request.Dob,
                 CreatedAt = DateTime.UtcNow,
             };
 

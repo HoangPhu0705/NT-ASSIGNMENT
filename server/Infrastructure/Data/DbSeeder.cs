@@ -41,7 +41,6 @@ public class DbSeeder
                 LastName = "min",
                 UserName = "admin",
                 Email = adminEmail,
-                Dob = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,
                 EmailConfirmed = true
             };

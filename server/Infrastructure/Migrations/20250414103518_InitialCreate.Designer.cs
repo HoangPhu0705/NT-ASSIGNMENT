@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250414065819_InitialCreate")]
+    [Migration("20250414103518_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -479,9 +479,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("Dob")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")

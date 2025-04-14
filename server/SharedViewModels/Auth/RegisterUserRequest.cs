@@ -19,7 +19,5 @@ namespace SharedViewModels.Auth
         [DataType(DataType.Password)]
         public string Password { get; set; }
         
-        [Required(ErrorMessage = "Birthday is required")]
-        public DateTime Dob { get; set; }
     }
 }

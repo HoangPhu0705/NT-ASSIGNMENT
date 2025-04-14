@@ -15,9 +15,6 @@ namespace Domain.Entities
 
         [AllowNull]
         public string? ProfilePicture { get; set; }
-
-        public DateTime Dob{ get; set; }
-
         public DateTime CreatedAt { get; set; }
     }
 }
