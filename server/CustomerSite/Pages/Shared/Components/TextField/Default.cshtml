@@ -1,0 +1,25 @@
+@model CustomerSite.ViewComponents.TextFieldViewModel
+
+<div class="mb-10">
+    <div class="relative z-10">
+        <input
+            id="@Model.Id"
+            name="@Model.Name"
+            type="@Model.Type"
+            value="@Model.Value"
+            class="peer block w-full appearance-none border-0 border-b-2 border-gray-700 bg-transparent px-0 py-2.5 text-md text-gray-700 focus:border-black focus:border-b-3 focus:outline-none focus:ring-0"
+            placeholder="@Model.Placeholder"
+        />
+        <label
+            for="@Model.Id"
+            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-85 transform text-md text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4"
+        >
+            @Model.Label
+        </label>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <p class="text-red-500 text-sm mt-1">@Model.Error</p>
+    }
+</div>

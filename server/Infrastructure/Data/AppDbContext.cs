@@ -28,9 +28,12 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-
+        
+        builder.UseOpenIddict();
+        
         builder.Entity<User>().ToTable("Users");
-
+        
+        
         // Cascade 
         builder.Entity<Category>()
             .HasOne(c => c.ParentCategory)

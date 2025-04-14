@@ -6,4 +6,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <Target Name="BuildCSS" BeforeTargets="Build">
+    <Exec Command="npm run build:css" />
+  </Target>
+  
+  <ItemGroup>
+    <Folder Include="Pages\Products\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharedViewModels\SharedViewModels.csproj" />
+  </ItemGroup>
+
 </Project>

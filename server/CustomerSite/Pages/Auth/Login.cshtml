@@ -1,0 +1,82 @@
+@page
+@model CustomerSite.Pages.Auth.LoginModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="bg-[#F4F4F4] flex flex-col justify-center items-center w-screen min-h-screen px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32">
+    <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold mb-3 flex items-center gap-1">
+        NE
+        <span class="inline-flex items-center mt-1 sm:mt-2">
+            <i class="hgi hgi-stroke hgi-cancel-01 mt-1"></i>
+        </span>
+        TECH
+    </h1>
+    <p class="text-lg sm:text-xl md:text-2xl font-light mb-3 text-center">
+        Login with your NEX ID.
+    </p>
+    <form
+        class="space-y-4 w-full max-w-md sm:max-w-md md:max-w-2xl lg:max-w-3xl"
+        method="post">
+        @{
+            var emailError = ModelState["Email"]?.Errors.FirstOrDefault()?.ErrorMessage;
+            var passwordError = ModelState["Password"]?.Errors.FirstOrDefault()?.ErrorMessage;
+        }
+        
+        <vc:text-field
+            id="email"
+            name="Email"
+            label="Email"
+            type="email"
+            value="@Model.LoginRequest.Email"
+            error="@emailError"
+            placeholder=" ">
+        </vc:text-field>
+        
+        <vc:password-text-field
+            id="password"
+            name="Password"
+            label="Password"
+            value="@Model.LoginRequest.Password"
+            error="@passwordError"
+            placeholder=" ">
+        </vc:password-text-field>
+
+        <div class="text-right">
+            <a
+                href="#"
+                class="text-black text-sm sm:text-md font-bold hover:text-gray-500 underline">
+                Forgot password?
+            </a>
+        </div>
+        <button
+            type="submit"
+            class="w-full bg-[#2F3132]  rounded-none text-white border-4  hover:border-black hover:bg-transparent hover:text-black hover:cursor-pointer py-2 sm:py-5">
+            <span class="font-bold text-lg sm:text-xl md:text-xl">LOGIN</span>
+        </button>
+    </form>
+    <div class="flex flex-col sm:flex-row items-center gap-2 mt-4 text-center">
+        <p class="text-md sm:text-lg">Don't have an account?</p>
+        <a
+            href="/auth/create-account"
+            class="text-[#2F3132] text-md sm:text-lg hover:text-gray-500 font-bold hover:underline mb-0.5 underline"
+        >
+            Create Account
+        </a>
+    </div>
+    <div class="flex w-[70%] sm:w-[70%] md:w-[35%] items-center justify-center mt-6">
+        <div class="w-full h-[1px] bg-gray-400"></div>
+        <div class="text-gray-400 px-2">OR</div>
+        <div class="w-full h-[1px] bg-gray-400"></div>
+    </div>
+    <button class="btn btn-outline rounded-none mt-4 px-12 hover:bg-[#2F3132] hover:text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" class="mr-2">
+            <path
+                d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                fill="currentColor"
+            />
+        </svg>
+        LOGIN WITH GOOGLE
+    </button>
+</div>

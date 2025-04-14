@@ -1,0 +1,54 @@
+@model CustomerSite.ViewComponents.PasswordTextFieldViewModel
+
+<div class="mb-10">
+    <div class="relative z-10">
+        <input
+            id="@Model.Id"
+            name="@Model.Name"
+            type="password"
+            value="@Model.Value"
+            class="peer block w-full appearance-none border-0 border-b-2 border-gray-700 bg-transparent px-0 py-2.5 text-md text-gray-700 focus:border-black focus:border-b-3 focus:outline-none focus:ring-0"
+            placeholder="@Model.Placeholder"
+        />
+        <label
+            for="@Model.Id"
+            class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-85 transform text-md text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-6 peer-focus:scale-75 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4"
+        >
+            @Model.Label
+        </label>
+        <button
+            type="button"
+            onclick="togglePasswordVisibility('@Model.Id')"
+            onmousedown="event.preventDefault()"
+            class="absolute right-0 top-2 text-gray-500 focus:outline-none hover:cursor-pointer"
+        >
+            <i id="@($"icon-view-{Model.Id}")" class="hgi hgi-stroke hgi-view" style="display: none; font-size: 25px;"></i>
+            <i id="@($"icon-view-off-{Model.Id}")" class="hgi hgi-stroke hgi-view-off" style="font-size: 25px;"></i>
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <p class="text-red-500 text-sm mt-1">@Model.Error</p>
+    }
+
+    <script>
+        function togglePasswordVisibility(inputId) {
+            const inputElement = document.getElementById(inputId);
+            const viewIcon = document.getElementById(`icon-view-${inputId}`);
+            const viewOffIcon = document.getElementById(`icon-view-off-${inputId}`);
+
+            if (inputElement.type === 'password') {
+                // Show password
+                inputElement.type = 'text';
+                viewIcon.style.display = 'inline-block'; // Show view icon
+                viewOffIcon.style.display = 'none'; // Hide view-off icon
+            } else {
+                // Hide password
+                inputElement.type = 'password';
+                viewIcon.style.display = 'none'; // Hide view icon
+                viewOffIcon.style.display = 'inline-block'; // Show view-off icon
+            }
+        }
+    </script>
+</div>

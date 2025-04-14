@@ -1,3 +1,8 @@
+using System.Net.Http.Headers;
+using CustomerSite.Models;
+using CustomerSite.Services;
+using Microsoft.Extensions.Options;
+
 namespace CustomerSite
 {
     public class Program
@@ -8,14 +13,21 @@ namespace CustomerSite
 
             // Add services to the container.
             builder.Services.AddRazorPages();
-
+            builder.Services.AddScoped<ApiService>();
+            builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
+            
+            builder.Services.AddHttpClient("EcommerceApi", (sp, client) =>
+            {
+                var settings = sp.GetRequiredService<IOptions<ApiSettings>>().Value;
+                client.BaseAddress = new Uri(settings.BaseUrl);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            });
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

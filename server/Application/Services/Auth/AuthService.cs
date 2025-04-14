@@ -12,33 +12,23 @@ namespace Application.Services.Auth
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
-        private readonly SignInManager<User> _signInManager;
-        private readonly IConfiguration _config;
-        private readonly IEmailSender _emailSender; 
-        private readonly ITokenService _tokenService;
+        
+        private readonly IEmailSender _emailSender;
 
         public AuthService(
             UserManager<User> userManager,
             RoleManager<IdentityRole<Guid>> roleManager,
-            SignInManager<User> signInManager,
-            IEmailSender emailSender,
-            ITokenService tokenService,
-            IConfiguration config)
+            IEmailSender emailSender
+           )
         {
             _userManager = userManager;
             _roleManager = roleManager;
-            _signInManager = signInManager;
             _emailSender = emailSender;
-            _tokenService = tokenService;
-            _config = config;
         }
 
-       
-
-        public async Task<AuthResponse> HandleOAuthLoginAsync(string provider, OAuthRequest request)
+        public async Task<User> CreateOrGetUserFromOAuthAsync(string provider, OAuthRequest request)
         {
             var user = await _userManager.FindByLoginAsync(provider, request.ExternalId);
-
             if (user == null) 
             {
                 user = await _userManager.FindByEmailAsync(request.Email);
@@ -80,25 +70,7 @@ namespace Application.Services.Auth
                 throw new Exception("Email not confirmed. Please confirm your email to log in.");
             }
 
-
-
-            return await GenerateAuthResponse(user);
-        }
-
-        public async Task<AuthResponse> LoginAsync(LoginUserRequest request)
-        {
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user == null)
-                throw new Exception("Invalid email or password");
-
-            if (!user.EmailConfirmed)
-                throw new Exception("Please confirm your email before logging in.");
-
-            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
-            if (!result.Succeeded)
-                throw new Exception("Invalid email or password");
-
-            return await GenerateAuthResponse(user);
+            return user;
         }
 
         public async Task<ApiResponse<string>> RegisterAsync(RegisterUserRequest request)
@@ -160,21 +132,5 @@ namespace Application.Services.Auth
                 await _roleManager.CreateAsync(new IdentityRole<Guid> { Name = roleName });
             }
         }
-
-        private async Task<AuthResponse> GenerateAuthResponse(User user)
-        {
-            var roles = await _userManager.GetRolesAsync(user);
-            var token = await _tokenService.GenerateJwtTokenAsync(user, roles);
-            return new AuthResponse
-            {
-                Token = token,
-                UserId = user.Id.ToString(),
-                UserName = user.UserName,
-                Email = user.Email,
-                Role = roles.FirstOrDefault() ?? "User"
-            };
-        }
-
-    } 
-   
+    }
 }
