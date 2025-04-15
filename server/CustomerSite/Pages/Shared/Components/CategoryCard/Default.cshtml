@@ -1,0 +1,8 @@
+@model CustomerSite.ViewComponents.CategoryCardViewModel
+
+<div class="max-w-xl rounded-xl overflow-hidden flex items-center justify-center p-4">
+    <a href="@Model.href" class="w-2/3 flex flex-col items-center hover:underline">
+        <img class="object-cover rounded-xl w-full" src="@Model.imageUrl">
+        <p class="text-center mt-4 font-medium">@Model.categoryName</p>
+    </a>
+</div>

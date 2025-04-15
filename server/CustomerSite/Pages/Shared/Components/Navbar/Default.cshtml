@@ -1,4 +1,4 @@
-<div class="navbar bg-base-100 px-36 border-b-4 border-base-200">
+<div class="navbar bg-base-100 px-36 border-b-4 border-base-200 py-0">
     <div class="flex-1">
         <a class="mr-12" href="/">
             <h1 class="text-lg sm:text-lg md:text-2xl font-bold mb-3 flex justify-center items-center gap-1">
@@ -8,9 +8,9 @@
             </h1>
         </a>
 
-        <ul class="menu menu-horizontal px-1">
-            <li>
-                <a class="btn btn-ghost hover:bg-transparent normal-case text-xl group" href="/shop">
+        <ul class="menu menu-horizontal px-1 ">
+            <li id="shop-link" class="h-full">
+                <a  class="btn h-full btn-ghost hover:bg-transparent normal-case text-xl group" href="/shop">
                     <h1 class="sm:text-md md:text-xl font-medium mb-2 relative">
                         Shop
                         <span class="absolute -bottom-3 left-0 h-[6px] w-0 bg-[#00FDCF] group-hover:w-full transition-all duration-300 rounded-xl"></span>
@@ -37,16 +37,16 @@
     </div>
     <div class="flex-none">
         <ul class="menu menu-horizontal px-1">
-            <li><a>Link</a></li>
             <li>
-                <details>
-                    <summary>Parent</summary>
-                    <ul class="bg-base-100 rounded-t-none p-2">
-                        <li><a>Link 1</a></li>
-                        <li><a>Link 2</a></li>
-                    </ul>
-                </details>
+                <label class="input input-bordered flex items-center gap-2 rounded-full">
+                    <input type="text" class="grow" placeholder="Search"/>
+                    <i class="hgi hgi-stroke hgi-search-01"></i>
+                </label>
             </li>
+            <li><a href=""><i class="hgi hgi-stroke hgi-favourite text-lg"></i></a></li>
+            <li></li>
+            <li></li>
+
         </ul>
     </div>
 </div>
