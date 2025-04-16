@@ -14,12 +14,14 @@ using Application.Interfaces.Auth;
 
 namespace API.Controllers
 {
+   
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
-
+        
+        
         public AuthController(
             IAuthService authService,
             SignInManager<User> signInManager,
@@ -63,86 +65,46 @@ namespace API.Controllers
         {
             var request = HttpContext.GetOpenIddictServerRequest() ??
                 throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
-
             ClaimsPrincipal principal;
 
             if (request.IsPasswordGrantType())
             {
                 var user = await _userManager.FindByEmailAsync(request.Username);
+                if (user == null) return ForbidWithError(OpenIddictConstants.Errors.InvalidClient, "The email is invalid.");
 
-                if (user == null)
-                {
-                    return ForbidWithError(OpenIddictConstants.Errors.InvalidGrant, "The email is invalid.");
-                }
-
-                if (!await _userManager.IsEmailConfirmedAsync(user))
-                {
-                    return ForbidWithError(OpenIddictConstants.Errors.InvalidGrant, "The email is not confirmed.");
-                }
+                if (!await _userManager.IsEmailConfirmedAsync(user)) return ForbidWithError(OpenIddictConstants.Errors.InvalidGrant, "The email is not confirmed.");
                 
                 var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
-                if (!result.Succeeded)
-                {
-                    return ForbidWithError(OpenIddictConstants.Errors.InvalidGrant, "The password is invalid.");
-                }
-
+                if (!result.Succeeded) return ForbidWithError(OpenIddictConstants.Errors.InvalidClient, "The password is invalid.");
+                
+                
                 principal = await CreateClaimsPrincipalAsync(user);
+                
             }
             else if (request.IsAuthorizationCodeGrantType() || request.IsRefreshTokenGrantType())
             {
                 principal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
 
                 var user = await _userManager.GetUserAsync(principal);
-                if (user is null)
-                {
-                    return ForbidWithError(OpenIddictConstants.Errors.InvalidGrant, "The token is no longer valid.");
-                }
+                if (user is null) return ForbidWithError(OpenIddictConstants.Errors.ExpiredToken, "The token is no longer valid.");
+                
 
-                if (!await _signInManager.CanSignInAsync(user))
-                {
-                    return ForbidWithError(OpenIddictConstants.Errors.InvalidGrant, "The user is no longer allowed to sign in.");
-                }
-
+                if (!await _signInManager.CanSignInAsync(user)) return ForbidWithError(OpenIddictConstants.Errors.AccessDenied, "The user is no longer allowed to sign in.");
+                
                 principal = await CreateClaimsPrincipalAsync(user);
             }
             else
             {
                 throw new InvalidOperationException("The specified grant type is not supported.");
             }
-
-            // await HttpContext.SignInAsync(
-            //     OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
-            //     principal,
-            //     new AuthenticationProperties
-            //     {
-            //         ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1), 
-            //         IsPersistent = true
-            //     });
-            //
-            // // Get the access token from the authentication ticket
-            // var accessToken = await HttpContext.GetTokenAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, 
-            //     OpenIddictServerAspNetCoreConstants.Tokens.AccessToken);
-            //
-            // if (!string.IsNullOrEmpty(accessToken))
-            // {
-            //     // Store JWT in cookie
-            //     Response.Cookies.Append(
-            //         "nextech_token", 
-            //         accessToken,
-            //         new CookieOptions
-            //         {
-            //             HttpOnly = true,
-            //             Secure = true,
-            //             SameSite = SameSiteMode.Strict,
-            //             Expires = DateTimeOffset.UtcNow.AddHours(1)
-            //         });
-            // }
+            
+            var requestedScopes = request.GetScopes();
+            principal.SetScopes(requestedScopes);
 
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
         
-
         [HttpPost("~/api/auth/{provider}")]
         public async Task<IActionResult> OAuthLogin(string provider, [FromBody] OAuthRequest request)
         {

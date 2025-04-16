@@ -10,6 +10,7 @@ using DotNetEnv;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using OpenIddict.Server;
 using OpenIddict.Server.AspNetCore;
 
 namespace API
@@ -83,12 +84,7 @@ namespace API
                 options.AddDevelopmentEncryptionCertificate()
                        .AddDevelopmentSigningCertificate();
 
-                options.RegisterScopes(
-                    OpenIddictConstants.Scopes.Email,
-                    OpenIddictConstants.Scopes.Profile,
-                    OpenIddictConstants.Scopes.Roles,
-                    "api"
-                );
+                options.RegisterScopes("email","profile","roles","offline_access","api");
 
                 options.AcceptAnonymousClients();
 
@@ -101,6 +97,7 @@ namespace API
                        .EnableAuthorizationEndpointPassthrough()
                        .EnableUserInfoEndpointPassthrough()
                        .EnableEndSessionEndpointPassthrough();
+                
             }).AddValidation(options =>
             {
                 options.UseLocalServer();
@@ -122,7 +119,7 @@ namespace API
             builder.Services.AddScoped<IEmailSender, EmailSender>();
             builder.Services.AddScoped<DbSeeder>();
 
-            // Configure the OAuth providers
+            // Configure OAuth providers
             builder.Services.AddAuthentication()
                 .AddGoogle(options =>
                 {
@@ -214,14 +211,17 @@ namespace API
                         OpenIddictConstants.Permissions.GrantTypes.Password,
                         OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
 
+
                         OpenIddictConstants.Permissions.Scopes.Email,
                         OpenIddictConstants.Permissions.Scopes.Profile,
                         OpenIddictConstants.Permissions.Scopes.Roles,
-                        "api"
+                        OpenIddictConstants.Permissions.Prefixes.Scope + "api",
+                        OpenIddictConstants.Scopes.OfflineAccess
+
+
                     }
                 });
             }
-
             // Admin application
             if (await manager.FindByClientIdAsync("admin-web-client") is null)
             {
@@ -246,36 +246,8 @@ namespace API
                         OpenIddictConstants.Permissions.Scopes.Email,
                         OpenIddictConstants.Permissions.Scopes.Profile,
                         OpenIddictConstants.Permissions.Scopes.Roles,
-                        "api"
-                    }
-                });
-            }
-
-            // Legacy client
-            if (await manager.FindByClientIdAsync("web-client") is null)
-            {
-                await manager.CreateAsync(new OpenIddictApplicationDescriptor
-                {
-                    ClientId = "web-client",
-                    ClientSecret = "client-secret",
-                    DisplayName = "Web Client",
-                    RedirectUris = { new Uri("https://localhost:7251/signin-oidc") },
-                    PostLogoutRedirectUris = { new Uri("https://localhost:7251/signout-callback-oidc") },
-                    Permissions =
-                    {
-                        OpenIddictConstants.Permissions.Endpoints.Authorization,
-                        OpenIddictConstants.Permissions.Endpoints.Token,
-                        OpenIddictConstants.Permissions.Endpoints.EndSession,
-
-                        OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-                        OpenIddictConstants.Permissions.GrantTypes.Password,
-                        OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-
-                        OpenIddictConstants.Permissions.Scopes.Email,
-                        OpenIddictConstants.Permissions.Scopes.Profile,
-                        OpenIddictConstants.Permissions.Scopes.Roles,
-
-                        "api"
+                        OpenIddictConstants.Permissions.Prefixes.Scope + "api",
+                        OpenIddictConstants.Scopes.OfflineAccess,
                     }
                 });
             }

@@ -1,5 +1,4 @@
-@page "/auth/create-account"
-@model CustomerSite.Pages.Auth.CreateAccount
+@model SharedViewModels.Auth.RegisterUserRequest
 
 @{
     Layout = null;
@@ -27,46 +26,40 @@
         TECH
     </h1>
     <p class="text-lg sm:text-xl md:text-2xl font-light mb-3 text-center">
-        Login with your NEX ID.
+        Create your NEX ID.
     </p>
     <form
-        class="space-y-4 w-full max-w-md sm:max-w-md md:max-w-2xl lg:max-w-3xl"
-        method="post">
-        @{
-            var emailError = ModelState["Email"]?.Errors.FirstOrDefault()?.ErrorMessage;
-            var firstNameError = ModelState["FirstName"]?.Errors.FirstOrDefault()?.ErrorMessage;
-            var lastNameError = ModelState["LastName"]?.Errors.FirstOrDefault()?.ErrorMessage;
-            var passwordError = ModelState["Password"]?.Errors.FirstOrDefault()?.ErrorMessage;
-        }
+        asp-action="CreateAccount"
+        asp-controller="Auth"
+        method="post"
+        class="space-y-4 w-full max-w-md sm:max-w-md md:max-w-2xl lg:max-w-3xl">
         <vc:text-field
             id="firstname"
-            name="firstname"
+            name="FirstName"
             label="First Name"
             type="text"
-            value="@Model.RegisterUserRequest.FirstName"
-            error="@firstNameError"
+            value="@Model.FirstName"
+            error="@(ViewData["FirstNameError"]?.ToString() ?? "")"
             placeholder=" ">
         </vc:text-field>
-            
-        
-        
+
         <vc:text-field
             id="lastname"
-            name="lastname"
+            name="LastName"
             label="Last Name"
             type="text"
-            value="@Model.RegisterUserRequest.LastName"
-            error="@lastNameError"
+            value="@Model.LastName"
+            error="@(ViewData["LastNameError"]?.ToString() ?? "")"
             placeholder=" ">
         </vc:text-field>
-        
+
         <vc:text-field
             id="email"
             name="Email"
             label="Email"
             type="email"
-            value="@Model.RegisterUserRequest.Email"
-            error="@emailError"
+            value="@Model.Email"
+            error="@(ViewData["EmailError"]?.ToString() ?? "")"
             placeholder=" ">
         </vc:text-field>
 
@@ -74,8 +67,8 @@
             id="password"
             name="Password"
             label="Password"
-            value="@Model.RegisterUserRequest.Password"
-            error="@passwordError"
+            value="@Model.Password"
+            error="@(ViewData["PasswordError"]?.ToString() ?? "")"
             placeholder=" ">
         </vc:password-text-field>
 
@@ -88,13 +81,13 @@
         </div>
         <button
             type="submit"
-            class="w-full bg-[#2F3132]  rounded-none text-white border-4  hover:border-black hover:bg-transparent hover:text-black hover:cursor-pointer py-2 sm:py-4">
+            class="w-full bg-[#2F3132] rounded-none text-white border-4 hover:border-black hover:bg-transparent hover:text-black hover:cursor-pointer py-2 sm:py-4">
             <span class="font-bold text-lg sm:text-xl md:text-xl">CREATE ACCOUNT</span>
         </button>
     </form>
     <div class="mt-4 text-center">
         <a
-            href="/auth/login"  
+            href="/auth/login"
             class="text-[#2F3132] text-md sm:text-lg hover:text-gray-500 font-bold hover:underline mb-0.5 underline"
         >
             Have an account? Login

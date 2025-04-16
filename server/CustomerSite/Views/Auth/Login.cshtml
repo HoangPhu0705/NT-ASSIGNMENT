@@ -1,9 +1,6 @@
-@page
-@model CustomerSite.Pages.Auth.LoginModel
 
 @{
     Layout = null;
-    ViewData["Title"] = "Login";
 }
 
 <!doctype html>
@@ -32,18 +29,15 @@
         <form
             class="space-y-4 w-full max-w-md sm:max-w-md md:max-w-2xl lg:max-w-3xl"
             method="post">
-            @{
-                var emailError = ModelState["Email"]?.Errors.FirstOrDefault()?.ErrorMessage;
-                var passwordError = ModelState["Password"]?.Errors.FirstOrDefault()?.ErrorMessage;
-            }
+            
 
             <vc:text-field
                 id="email"
                 name="Email"
                 label="Email"
                 type="email"
-                value="@Model.LoginRequest.Email"
-                error="@emailError"
+                value="@Model.Email"
+                error="@(ViewData["EmailError"]?.ToString() ?? "")"
                 placeholder=" ">
             </vc:text-field>
 
@@ -51,8 +45,8 @@
                 id="password"
                 name="Password"
                 label="Password"
-                value="@Model.LoginRequest.Password"
-                error="@passwordError"
+                value="@Model.Password"
+                error="@(ViewData["PasswordError"]?.ToString() ?? "")"
                 placeholder=" ">
             </vc:password-text-field>
 

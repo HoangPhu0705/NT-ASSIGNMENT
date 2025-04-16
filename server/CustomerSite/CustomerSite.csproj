@@ -10,12 +10,18 @@
     <Exec Command="npm run build:css" />
   </Target>
 
+
+
   <ItemGroup>
-    <ProjectReference Include="..\SharedViewModels\SharedViewModels.csproj" />
+    <_ContentIncludedByDefault Remove="Shared\Components\CategoryCard\Default.cshtml" />
+    <_ContentIncludedByDefault Remove="Shared\Components\Navbar\Default.cshtml" />
+    <_ContentIncludedByDefault Remove="Shared\Components\PasswordTextField\Default.cshtml" />
+    <_ContentIncludedByDefault Remove="Shared\Components\TextField\Default.cshtml" />
+    <_ContentIncludedByDefault Remove="Shared\_Layout.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
-    <_ContentIncludedByDefault Remove="Pages\Shared\Components\DobField\Default.cshtml" />
+    <ProjectReference Include="..\SharedViewModels\SharedViewModels.csproj" />
   </ItemGroup>
 
 </Project>

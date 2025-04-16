@@ -12,22 +12,24 @@ namespace CustomerSite
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddRazorPages();
+            builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<ApiService>();
             builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
             
-            builder.Services.AddHttpClient("EcommerceApi", (sp, client) =>
+            builder.Services.AddHttpClient("NextechApi", (sp, client) =>
             {
                 var settings = sp.GetRequiredService<IOptions<ApiSettings>>().Value;
                 client.BaseAddress = new Uri(settings.BaseUrl);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             });
+
             var app = builder.Build();
 
-            // HTTP request pipeline.
+            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Error");
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -38,7 +40,9 @@ namespace CustomerSite
 
             app.UseAuthorization();
 
-            app.MapRazorPages();
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
         }

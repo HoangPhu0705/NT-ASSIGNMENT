@@ -1,6 +1,6 @@
 module.exports = {
   content: [
-    "./Pages/**/*.{cshtml,html}", // Include Razor Pages files
+    "./Views/**/*.{cshtml,html}", // Include Razor Pages files
     "./wwwroot/**/*.{html,js}"    // Include static files in wwwroot
   ],
   theme: {

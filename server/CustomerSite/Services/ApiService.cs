@@ -6,6 +6,6 @@ public class ApiService
 
     public ApiService(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClientFactory.CreateClient("EcommerceApi");
+        _httpClient = httpClientFactory.CreateClient("NextechApi");
     }
-}   
+}
