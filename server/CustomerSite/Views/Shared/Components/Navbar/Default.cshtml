@@ -1,4 +1,5 @@
-<div class="navbar bg-base-100 px-36 border-b-4 border-base-200 py-0">
+<div class="navbar bg-base-100 px-36 border-b-4 border-base-200 py-0 min-h-[60px]">
+    
     <div class="flex-1">
         <a class="mr-12" href="/">
             <h1 class="text-lg sm:text-lg md:text-2xl font-bold mb-3 flex justify-center items-center gap-1">
@@ -8,9 +9,9 @@
             </h1>
         </a>
 
-        <ul class="menu menu-horizontal px-1 ">
+        <ul class="menu menu-horizontal px-1 h-full">
             <li id="shop-link" class="h-full">
-                <a  class="btn h-full btn-ghost hover:bg-transparent normal-case text-xl group" href="/shop">
+                <a class="btn h-full btn-ghost hover:bg-transparent normal-case text-xl group" href="/shop">
                     <h1 class="sm:text-md md:text-xl font-medium mb-2 relative">
                         Shop
                         <span class="absolute -bottom-3 left-0 h-[6px] w-0 bg-[#00FDCF] group-hover:w-full transition-all duration-300 rounded-xl"></span>
@@ -36,17 +37,27 @@
         </ul>
     </div>
     <div class="flex-none">
-        <ul class="menu menu-horizontal px-1">
-            <li>
-                <label class="input input-bordered flex items-center gap-2 rounded-full">
-                    <input type="text" class="grow" placeholder="Search"/>
-                    <i class="hgi hgi-stroke hgi-search-01"></i>
-                </label>
-            </li>
-            <li><a href=""><i class="hgi hgi-stroke hgi-favourite text-lg"></i></a></li>
-            <li></li>
-            <li></li>
+        <div class="flex justify-between items-center">
+            <label class="input input-bordered flex items-center gap-2 rounded-full mr-5">
+                <input type="text" class="grow" placeholder="Search"/>
+                <i class="hgi hgi-stroke hgi-search-01"></i>
+            </label>
+            <a href="" class="btn btn-circle mr-3 bg-transparent border-none shadow-none"><i class="hgi hgi-stroke hgi-favourite text-2xl"></i></a>
 
-        </ul>
+            <a href="" class="btn btn-circle mr-3 bg-transparent border-none shadow-none"><i class="hgi hgi-stroke hgi-shopping-cart-02 text-2xl"></i></a>
+            <div class="dropdown dropdown-hover dropdown-bottom dropdown-end">
+                <a href="" role="button" class="btn btn-circle mr-3 bg-transparent border-none shadow-none"><i class="hgi hgi-stroke hgi-user text-2xl"></i></a>
+                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-72 p-6 shadow">
+                    <div class=" text-lg font-light">
+                        <span class="font-bold">
+                            One account is all you need
+                        </span>Get access to your Nextech account and so much more with <span class="font-bold">Nex ID.</span>
+                    </div>
+                    <li><a href="auth/login" class="btn mt-4 rounded-full bg-[#4CF6CF] font-bold">LOGIN</a></li>
+                    <li><a href="auth/create-account" class="btn mt-4 rounded-full bg-black text-white font-bold hover:bg-white hover:text-black">CREATE AN ACCOUNT</a></li>
+                </ul>
+            </div>
+
+        </div>
     </div>
 </div>

@@ -1,0 +1,45 @@
+
+@{
+    Layout = null;
+}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdn.hugeicons.com/font/hgi-stroke-rounded.css" />
+    <link rel="stylesheet" href="~/css/output.css" asp-append-version="true" />
+</head>
+    <body>
+    <div class="bg-[#F4F4F4] flex flex-col justify-center items-center w-screen min-h-screen px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32">
+        <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold mb-3 flex items-center gap-1">
+            NE
+            <span class="inline-flex items-center mt-1 sm:mt-2">
+            <i class="hgi hgi-stroke hgi-cancel-01 mt-1"></i>
+        </span>
+            TECH
+        </h1>
+        <p class="text-lg sm:text-xl md:text-2xl font-light mb-3 text-center">
+            A confirmation email has been sent to <span class="font-bold">@ViewData["Email"]</span>.<br>
+            Please check your inbox (and spam/junk folder) and click the link to confirm your email.
+        </p>
+
+        <form
+            asp-action="ResendConfirmationEmail"
+            asp-controller="Auth"
+            method="post">
+            <input type="hidden" name="email" value="@TempData["Email"]" />
+            <button
+                type="submit"
+                class="btn btn-wide bg-black text-white hover:bg-gray-700">
+                Resend Email
+            </button>
+        </form>
+        
+    </div>
+    </body>
+</html>

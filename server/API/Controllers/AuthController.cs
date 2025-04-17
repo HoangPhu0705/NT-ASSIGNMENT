@@ -21,7 +21,6 @@ namespace API.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         
-        
         public AuthController(
             IAuthService authService,
             SignInManager<User> signInManager,
@@ -46,25 +45,43 @@ namespace API.Controllers
             }
         }
 
+
+        [HttpPost("~/api/auth/resend-confirmation-email")]
+        public async Task<IActionResult> ResendConfirmationEmail([FromBody] string email)
+        {
+            try
+            {
+                var response = await _authService.ResendConfirmationEmailAsync(email);
+                return Ok(response);
+            }catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<string>.Error(ex.Message));
+            }
+        }
+        
         [HttpGet("~/api/auth/confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
             try
             {
                 var response = await _authService.ConfirmEmailAsync(userId, token);
-                return Ok(response);
+                if (response.Succeeded)
+                {
+                    return Redirect("https://localhost:7001/auth/confirm-email-callback");
+                }
+                return BadRequest(response);
             }
             catch (Exception ex)
             {
                 return BadRequest(ApiResponse<string>.Error(ex.Message));
             }
         }
-
+        
         [HttpPost("~/connect/token"), Produces("application/json")]
         public async Task<IActionResult> Exchange()
         {
-            var request = HttpContext.GetOpenIddictServerRequest() ??
-                throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
+            var request = HttpContext.GetOpenIddictServerRequest() ??  
+                          throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
             ClaimsPrincipal principal;
 
             if (request.IsPasswordGrantType())
@@ -72,24 +89,25 @@ namespace API.Controllers
                 var user = await _userManager.FindByEmailAsync(request.Username);
                 if (user == null) return ForbidWithError(OpenIddictConstants.Errors.InvalidClient, "The email is invalid.");
 
-                if (!await _userManager.IsEmailConfirmedAsync(user)) return ForbidWithError(OpenIddictConstants.Errors.InvalidGrant, "The email is not confirmed.");
+                if (!await _userManager.IsEmailConfirmedAsync(user)) 
+                    return ForbidWithError(OpenIddictConstants.Errors.InvalidGrant, "The email is not confirmed.");
                 
                 var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
-                if (!result.Succeeded) return ForbidWithError(OpenIddictConstants.Errors.InvalidClient, "The password is invalid.");
-                
+                if (!result.Succeeded) 
+                    return ForbidWithError(OpenIddictConstants.Errors.InvalidClient, "The password is invalid.");
                 
                 principal = await CreateClaimsPrincipalAsync(user);
-                
             }
             else if (request.IsAuthorizationCodeGrantType() || request.IsRefreshTokenGrantType())
             {
                 principal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
-
+            
                 var user = await _userManager.GetUserAsync(principal);
-                if (user is null) return ForbidWithError(OpenIddictConstants.Errors.ExpiredToken, "The token is no longer valid.");
+                if (user is null) 
+                    return ForbidWithError(OpenIddictConstants.Errors.ExpiredToken, "The token is no longer valid.");
                 
-
-                if (!await _signInManager.CanSignInAsync(user)) return ForbidWithError(OpenIddictConstants.Errors.AccessDenied, "The user is no longer allowed to sign in.");
+                if (!await _signInManager.CanSignInAsync(user)) 
+                    return ForbidWithError(OpenIddictConstants.Errors.AccessDenied, "The user is no longer allowed to sign in.");
                 
                 principal = await CreateClaimsPrincipalAsync(user);
             }
@@ -100,7 +118,7 @@ namespace API.Controllers
             
             var requestedScopes = request.GetScopes();
             principal.SetScopes(requestedScopes);
-
+            
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
@@ -111,7 +129,6 @@ namespace API.Controllers
             try
             {
                 var user = await _authService.CreateOrGetUserFromOAuthAsync(provider, request);
-                // Create a new ClaimsPrincipal for the user
                 var principal = await CreateClaimsPrincipalAsync(user);
                 
                 return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
@@ -121,6 +138,7 @@ namespace API.Controllers
                 return BadRequest(ApiResponse<string>.Error(ex.Message));
             }
         }
+        
 
         [HttpGet("~/connect/authorize")]
         [HttpPost("~/connect/authorize")]
@@ -144,7 +162,6 @@ namespace API.Controllers
                     });
             }
 
-            // Create a new ClaimsPrincipal based on the existing one
             var user = await _userManager.GetUserAsync(result.Principal) ??
                 throw new InvalidOperationException("The user details cannot be retrieved.");
 
@@ -153,10 +170,13 @@ namespace API.Controllers
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
         
+        
         [HttpGet("~/connect/logout")]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+            Response.Cookies.Delete("access_token");
+            Response.Cookies.Delete("refresh_token");
             return SignOut(
                 authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
                 properties: new AuthenticationProperties
@@ -164,6 +184,7 @@ namespace API.Controllers
                     RedirectUri = "/"
                 });
         }
+        
         
         //Other methods
         private async Task<ClaimsPrincipal> CreateClaimsPrincipalAsync(User user)

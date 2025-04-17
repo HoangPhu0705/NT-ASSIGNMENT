@@ -8,6 +8,7 @@ using Application.Services.Auth;
 using Domain.Entities;
 using DotNetEnv;
 using Infrastructure.Data;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using OpenIddict.Server;
@@ -80,7 +81,6 @@ namespace API
                     .SetUserInfoEndpointUris("/connect/userinfo")
                     .SetEndSessionEndpointUris("/connect/logout");
 
-                // Use simple asymmetric key for development
                 options.AddDevelopmentEncryptionCertificate()
                        .AddDevelopmentSigningCertificate();
 
@@ -91,20 +91,68 @@ namespace API
                 // Register the signing and encryption credentials
                 options.DisableAccessTokenEncryption();
 
-                // Register the ASP.NET Core host
                 options.UseAspNetCore()
                        .EnableTokenEndpointPassthrough()
                        .EnableAuthorizationEndpointPassthrough()
                        .EnableUserInfoEndpointPassthrough()
                        .EnableEndSessionEndpointPassthrough();
                 
+                options.SetAccessTokenLifetime(TimeSpan.FromHours(1));
+                options.SetRefreshTokenLifetime(TimeSpan.FromDays(14));
+
+                options.AddEventHandler<OpenIddictServerEvents.GenerateTokenContext>(builder =>
+                {
+                    builder.UseInlineHandler(context =>
+                    {
+                        var httpContext = context.Transaction.GetHttpRequest()?.HttpContext;
+                        // Get the access token and refresh token
+                        if (httpContext == null)
+                        {
+                            Console.WriteLine("HttpContext is null in GenerateTokenContext");
+                            return default;
+                        }
+                        var tokenType = context.TokenType;
+                        var token = context.Token;
+
+                        if (string.IsNullOrEmpty(token)) return default;
+                        switch (tokenType)
+                        {
+                            case "access_token":
+                            {
+                                var accessTokenCookieOptions = new CookieOptions
+                                {
+                                    HttpOnly = true,
+                                    Secure = true,
+                                    SameSite = SameSiteMode.Strict,
+                                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                                };
+                                httpContext.Response.Cookies.Append("access_token", token, accessTokenCookieOptions);
+                                break;
+                            }
+                            case "refresh_token":
+                            {
+                                var refreshTokenCookieOptions = new CookieOptions
+                                {
+                                    HttpOnly = true,
+                                    Secure = true,
+                                    SameSite = SameSiteMode.Strict,
+                                    Expires = DateTimeOffset.UtcNow.AddDays(14)
+                                };
+                                httpContext.Response.Cookies.Append("refresh_token", token, refreshTokenCookieOptions);
+                                break;
+                            }
+                        }
+                        return default;
+                    });
+                });
+
             }).AddValidation(options =>
             {
                 options.UseLocalServer();
                 options.UseAspNetCore();
             });
 
-            // Register Quartz.NET for OpenIddict token cleanup
+            // Register Quartz.NET for token cleanup
             builder.Services.AddQuartz(options =>
             {
                 options.UseMicrosoftDependencyInjectionJobFactory();
@@ -145,8 +193,8 @@ namespace API
                 {
                     builder.WithOrigins(
                             "http://localhost:5173",     // React admin app
-                            "https://localhost:7251",    // Razor Pages (HTTPS)
-                            "http://localhost:5111")     // Razor Pages (HTTP)
+                            "https://localhost:7001",    // Razor Pages (HTTPS)
+                            "http://localhost:5178")     // Razor Pages (HTTP)
                            .AllowAnyMethod()
                            .AllowAnyHeader()
                            .AllowCredentials();

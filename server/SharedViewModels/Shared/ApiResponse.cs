@@ -5,6 +5,12 @@
         public int Code { get; set; }
         public string Message { get; set; }
         public T Data { get; set; }
+        
+        public bool Succeeded => Code is >= 200 and < 300; 
+        
+        public ApiResponse()
+        {
+        }
 
         public ApiResponse(int code, string message, T data)
         {

@@ -9,6 +9,8 @@ namespace Application.Interfaces.Auth
         Task<ApiResponse<string>> RegisterAsync(RegisterUserRequest request);
         Task<ApiResponse<string>> ConfirmEmailAsync(string userId, string token);
         Task<User> CreateOrGetUserFromOAuthAsync(string provider, OAuthRequest request);
+        Task<ApiResponse<string>> ResendConfirmationEmailAsync(string email);
+
     }
 }
         

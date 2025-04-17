@@ -2,7 +2,6 @@
 
 @{
     Layout = null;
-    ViewData["Title"] = "Create Account";
 }
 
 <!doctype html>
@@ -28,6 +27,18 @@
     <p class="text-lg sm:text-xl md:text-2xl font-light mb-3 text-center">
         Create your NEX ID.
     </p>
+
+    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey(string.Empty))
+    {
+        @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+        {
+            <div class="toast toast-end">
+                <div class="alert alert-info bg-error">
+                    <span class="text-white">@error.ErrorMessage</span>
+                </div>
+            </div>
+        }
+    }
     <form
         asp-action="CreateAccount"
         asp-controller="Auth"

@@ -73,6 +73,26 @@ namespace Application.Services.Auth
             return user;
         }
 
+        public async Task<ApiResponse<string>> ResendConfirmationEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return ApiResponse<string>.Error("Email is required");
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return ApiResponse<string>.Error("User not found");
+
+            if (user.EmailConfirmed)
+                return ApiResponse<string>.Success("Email is already confirmed. You can log in.");
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var confirmationLink = 
+            $"https://localhost:7130/api/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+
+            await _emailSender.SendEmailAsync(user.Email, "Confirm Your Nextech Email", confirmationLink);
+
+            return ApiResponse<string>.Success("Confirmation email resent successfully. Please check your email.");
+        }
+
         public async Task<ApiResponse<string>> RegisterAsync(RegisterUserRequest request)
         {
             if(await _userManager.FindByEmailAsync(request.Email) != null)
@@ -97,7 +117,8 @@ namespace Application.Services.Auth
             await _userManager.AddToRoleAsync(user, "User");
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            var confirmationLink = $"https://localhost:7130/api/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+            var confirmationLink = 
+                $"https://localhost:7130/api/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
 
             await _emailSender.SendEmailAsync(user.Email, "Confirm Your Nextech Email", confirmationLink); 
 
