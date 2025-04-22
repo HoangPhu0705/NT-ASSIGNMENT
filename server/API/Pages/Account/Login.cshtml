@@ -1,0 +1,145 @@
+@page
+@model API.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Sign In";
+    Layout = null;
+}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdn.hugeicons.com/font/hgi-stroke-rounded.css" />
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.24/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+<div class="bg-[#F4F4F4] flex flex-col justify-center items-center w-screen min-h-screen px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32">
+    <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold mb-3 flex items-center gap-1 text-black">
+        NE
+        <span class="inline-flex items-center mt-1 sm:mt-2">    
+            <i class="hgi hgi-stroke hgi-cancel-01 mt-1"></i>
+        </span>
+        TECH
+    </h1>
+    <p class="text-lg sm:text-xl md:text-2xl font-light mb-3 text-center text-black">
+        Sign in with your NEX ID.
+    </p>
+    @if (ViewData["Error"] != null)
+    {
+        <div class="w-full max-w-md sm:max-w-md md:max-w-2xl lg:max-w-3xl text-red-500 text-sm mb-4">
+            @ViewData["Error"]
+        </div>
+    }
+    <form class="space-y-4 w-full max-w-md sm:max-w-md md:max-w-2xl lg:max-w-3xl" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm mb-4"></div>
+
+        <!-- Email Text Field -->
+        <div class="mb-7">
+            <div class="relative z-10 mt-6">
+                <input
+                    id="email"
+                    name="Input.Email"
+                    type="email"
+                    value="@Model.Input?.Email"
+                    class="peer block w-full appearance-none border-0 border-b-2 border-gray-700 bg-transparent px-0 py-2.5 text-md text-gray-700 focus:border-black focus:border-b-3 focus:outline-none focus:ring-0"
+                    placeholder=" "/>
+                <label
+                    for="email"
+                    class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-md text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-6 peer-focus:scale-75 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4">
+                    Email
+                </label>
+            </div>
+            <span asp-validation-for="Input.Email" class="text-red-500 text-sm mt-1"></span>
+        </div>
+
+        <!-- Password Text Field -->
+        <div class="mb-7">
+            <div class="relative z-10 mt-6">
+                <input
+                    id="password"
+                    name="Input.Password"
+                    type="password"
+                    value="@Model.Input?.Password"
+                    class="peer block w-full appearance-none border-0 border-b-2 border-gray-700 bg-transparent px-0 py-2.5 text-md text-gray-700 focus:border-black focus:border-b-3 focus:outline-none focus:ring-0"
+                    placeholder=" "/>
+                <label
+                    for="password"
+                    class="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-md text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-6 peer-focus:scale-75 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4">
+                    Password
+                </label>
+                <button
+                    type="button"
+                    onclick="togglePasswordVisibility('password')"
+                    onmousedown="event.preventDefault()"
+                    class="absolute right-0 top-2 text-gray-500 focus:outline-none hover:cursor-pointer">
+                    <i id="icon-view-password" class="hgi hgi-stroke hgi-view" style="display: none; font-size: 25px;"></i>
+                    <i id="icon-view-off-password" class="hgi hgi-stroke hgi-view-off" style="font-size: 25px;"></i>
+                </button>
+            </div>
+            <span asp-validation-for="Input.Password" class="text-red-500 text-sm mt-1"></span>
+        </div>
+
+        <div class="text-right">
+            <a href="/account/forgot-password" class="text-black text-sm sm:text-md font-bold hover:text-gray-500 underline">
+                Forgot password?
+            </a>
+        </div>
+        <button type="submit" class="w-full bg-[#2F3132] rounded-none text-white border-4 hover:border-black hover:bg-transparent hover:text-black hover:cursor-pointer py-2 sm:py-4">
+            <span class="font-bold text-lg sm:text-xl md:text-xl">SIGN IN</span>
+        </button>
+        @if (!string.IsNullOrEmpty(Model.Input?.ReturnUrl))
+        {
+            <input type="hidden" name="Input.ReturnUrl" value="@Model.Input.ReturnUrl"/>
+        }
+    </form>
+    <div class="flex flex-col sm:flex-row items-center gap-2 mt-4 text-center ">
+        <p class="text-md sm:text-lg text-black">Don't have an account?</p>
+        <a href="https://localhost:7001/auth/create-account" class="text-gray-800 text-md sm:text-lg hover:text-gray-500 font-bold hover:underline mb-0.5 underline">
+            Create Account
+        </a>
+    </div>
+    <div class="flex w-[70%] sm:w-[70%] md:w-[35%] items-center justify-center mt-6">
+        <div class="w-full h-[1px] bg-gray-400"></div>
+        <div class="text-gray-400 px-2">OR</div>
+        <div class="w-full h-[1px] bg-gray-400"></div>
+    </div>
+    <form method="post" asp-page-handler="OAuthLogin" asp-route-provider="Google">
+        <input type="hidden" name="Input.ReturnUrl" value="@Model.Input?.ReturnUrl" />
+        <button type="submit" class="btn btn-outline rounded-none mt-4 px-12 hover:bg-[#2F3132] hover:text-white border-black text-black">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" class="mr-2 inline">
+                <path
+                    d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387 .307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                    fill="currentColor"
+                />
+            </svg>
+            SIGN IN WITH GOOGLE
+        </button>
+    </form>
+</div>
+
+<script>
+    function togglePasswordVisibility(inputId) {
+        const inputElement = document.getElementById(inputId);
+        const viewIcon = document.getElementById(`icon-view-${inputId}`);
+        const viewOffIcon = document.getElementById(`icon-view-off-${inputId}`);
+
+        if (inputElement.type === 'password') {
+            inputElement.type = 'text';
+            viewIcon.style.display = 'inline-block';
+            viewOffIcon.style.display = 'none';
+        } else {
+            inputElement.type = 'password';
+            viewIcon.style.display = 'none';
+            viewOffIcon.style.display = 'inline-block';
+        }
+    }
+</script>
+
+</body>
+</html>

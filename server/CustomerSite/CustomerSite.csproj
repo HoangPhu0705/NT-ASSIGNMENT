@@ -18,10 +18,19 @@
     <_ContentIncludedByDefault Remove="Shared\Components\PasswordTextField\Default.cshtml" />
     <_ContentIncludedByDefault Remove="Shared\Components\TextField\Default.cshtml" />
     <_ContentIncludedByDefault Remove="Shared\_Layout.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Shared\Components\PasswordTextField\Default.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Shared\Components\TextField\Default.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SharedViewModels\SharedViewModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.15" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.8.0" />
+    <PackageReference Include="OpenIddict.Abstractions" Version="6.2.0" />
   </ItemGroup>
 
 </Project>

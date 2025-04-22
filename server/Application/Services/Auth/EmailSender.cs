@@ -9,7 +9,6 @@ namespace Application.Services.Auth
 {
     public class EmailSender : IEmailSender
     {
-
         private readonly IConfiguration _config;
         private readonly IWebHostEnvironment _env; 
 

@@ -1,0 +1,117 @@
+@model IEnumerable<System.Security.Claims.Claim>
+
+@{
+    ViewData["Title"] = "User Profile";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.24/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #2f3132;
+            color: white;
+        }
+        .email-highlight {
+            font-weight: bold;
+            color: #2f3132;
+        }
+        .link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #2f3132;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Profile</h1>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="card">
+                <h2>Your Details</h2>
+                <p>Email: <span class="email-highlight">@User.FindFirst("name")?.Value mmm</span></p>
+                <h3>All Claims</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Claim Type</th>
+                            <th>Claim Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var claim in Model)
+                        {
+                            <tr>
+                                <td>@claim.Type</td>
+                                <td>@claim.Value</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <!-- Logout Button -->
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="mb-4 text-right">
+                        @Html.AntiForgeryToken()
+                        <form action="/auth/logout" method="get" class="inline">
+                            <button type="submit" class="text-black hover:text-gray-500 font-bold underline border-0 bg-transparent cursor-pointer">
+                                Sign Outtttt
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="card">
+                <p>You are not logged in. <a href="/auth/login" class="text-blue-600 hover:underline">Sign in</a></p>
+            </div>
+        }
+        <a asp-controller="Home" asp-action="Index" class="link">Back to Home</a>
+    </div>
+</body>
+</html>

@@ -9,6 +9,6 @@ namespace API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-
+        
     }
 }

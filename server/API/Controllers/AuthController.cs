@@ -14,13 +14,12 @@ using Application.Interfaces.Auth;
 
 namespace API.Controllers
 {
-   
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
-        
+
         public AuthController(
             IAuthService authService,
             SignInManager<User> signInManager,
@@ -45,7 +44,6 @@ namespace API.Controllers
             }
         }
 
-
         [HttpPost("~/api/auth/resend-confirmation-email")]
         public async Task<IActionResult> ResendConfirmationEmail([FromBody] string email)
         {
@@ -53,12 +51,13 @@ namespace API.Controllers
             {
                 var response = await _authService.ResendConfirmationEmailAsync(email);
                 return Ok(response);
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ApiResponse<string>.Error(ex.Message));
             }
         }
-        
+
         [HttpGet("~/api/auth/confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -76,53 +75,34 @@ namespace API.Controllers
                 return BadRequest(ApiResponse<string>.Error(ex.Message));
             }
         }
-        
+
         [HttpPost("~/connect/token"), Produces("application/json")]
         public async Task<IActionResult> Exchange()
         {
-            var request = HttpContext.GetOpenIddictServerRequest() ??  
+            var request = HttpContext.GetOpenIddictServerRequest() ??
                           throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
             ClaimsPrincipal principal;
 
-            if (request.IsPasswordGrantType())
-            {
-                var user = await _userManager.FindByEmailAsync(request.Username);
-                if (user == null) return ForbidWithError(OpenIddictConstants.Errors.InvalidClient, "The email is invalid.");
-
-                if (!await _userManager.IsEmailConfirmedAsync(user)) 
-                    return ForbidWithError(OpenIddictConstants.Errors.InvalidGrant, "The email is not confirmed.");
-                
-                var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
-                if (!result.Succeeded) 
-                    return ForbidWithError(OpenIddictConstants.Errors.InvalidClient, "The password is invalid.");
-                
-                principal = await CreateClaimsPrincipalAsync(user);
-            }
-            else if (request.IsAuthorizationCodeGrantType() || request.IsRefreshTokenGrantType())
+            if (request.IsAuthorizationCodeGrantType() || request.IsRefreshTokenGrantType())
             {
                 principal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
-            
                 var user = await _userManager.GetUserAsync(principal);
-                if (user is null) 
+                if (user is null)
                     return ForbidWithError(OpenIddictConstants.Errors.ExpiredToken, "The token is no longer valid.");
-                
-                if (!await _signInManager.CanSignInAsync(user)) 
+                if (!await _signInManager.CanSignInAsync(user))
                     return ForbidWithError(OpenIddictConstants.Errors.AccessDenied, "The user is no longer allowed to sign in.");
-                
                 principal = await CreateClaimsPrincipalAsync(user);
             }
             else
             {
                 throw new InvalidOperationException("The specified grant type is not supported.");
             }
-            
+
             var requestedScopes = request.GetScopes();
             principal.SetScopes(requestedScopes);
-            
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
-        
         [HttpPost("~/api/auth/{provider}")]
         public async Task<IActionResult> OAuthLogin(string provider, [FromBody] OAuthRequest request)
         {
@@ -130,7 +110,6 @@ namespace API.Controllers
             {
                 var user = await _authService.CreateOrGetUserFromOAuthAsync(provider, request);
                 var principal = await CreateClaimsPrincipalAsync(user);
-                
                 return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             }
             catch (Exception ex)
@@ -138,7 +117,6 @@ namespace API.Controllers
                 return BadRequest(ApiResponse<string>.Error(ex.Message));
             }
         }
-        
 
         [HttpGet("~/connect/authorize")]
         [HttpPost("~/connect/authorize")]
@@ -150,7 +128,6 @@ namespace API.Controllers
 
             var result = await HttpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
 
-            // If not authenticated, redirect to the login page
             if (!result.Succeeded)
             {
                 return Challenge(
@@ -163,20 +140,17 @@ namespace API.Controllers
             }
 
             var user = await _userManager.GetUserAsync(result.Principal) ??
-                throw new InvalidOperationException("The user details cannot be retrieved.");
+                       throw new InvalidOperationException("The user details cannot be retrieved.");
 
             var principal = await CreateClaimsPrincipalAsync(user);
-            
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
-        
-        
+
         [HttpGet("~/connect/logout")]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            Response.Cookies.Delete("access_token");
-            Response.Cookies.Delete("refresh_token");
+
             return SignOut(
                 authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
                 properties: new AuthenticationProperties
@@ -184,19 +158,13 @@ namespace API.Controllers
                     RedirectUri = "/"
                 });
         }
-        
-        
-        //Other methods
+
         private async Task<ClaimsPrincipal> CreateClaimsPrincipalAsync(User user)
         {
-            // Create a new ClaimsPrincipal containing the claims that will be used to create an id_token, a token or a code.
             var principal = await _signInManager.CreateUserPrincipalAsync(user);
-
-            // Add custom claims
             var identity = principal.Identity as ClaimsIdentity;
             var roles = await _userManager.GetRolesAsync(user);
 
-            // Add role claim
             if (roles.Any())
             {
                 identity.AddClaim(new Claim(OpenIddictConstants.Claims.Role, roles.First()));
@@ -208,7 +176,7 @@ namespace API.Controllers
 
             return principal;
         }
-        
+
         private IActionResult ForbidWithError(string error, string description)
         {
             var properties = new AuthenticationProperties(new Dictionary<string, string?>

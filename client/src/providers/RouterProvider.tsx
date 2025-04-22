@@ -1,6 +1,6 @@
-import ErrorPage from "@/components/ui/error_page";
+import Layout from "@/components/layout/Layout";
 import Login from "@/pages/auth/Login";
-import HomePage from "@/pages/home/HomePage";
+import Dashboard from "@/pages/dashboard/Dashboard";
 import {
   createBrowserRouter,
   RouterProvider as ReactRouterProvider,
@@ -9,14 +9,12 @@ import {
 // Define your routes
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <HomePage />,
-    errorElement: <ErrorPage />,
-  },
-  {
     path: "auth/login",
     element: <Login />,
-    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/",
+    element: <Layout children={<Dashboard />} />,
   },
 ]);
 

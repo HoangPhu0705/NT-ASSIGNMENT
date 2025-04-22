@@ -1,6 +1,11 @@
 using CustomerSite.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc;
 using SharedViewModels.Auth;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace CustomerSite.Controllers
 {
@@ -8,10 +13,24 @@ namespace CustomerSite.Controllers
     public class AuthController : Controller
     {
         private readonly AuthService _authService;
-        
-        public AuthController(AuthService authService)
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public AuthController(AuthService authService, IHttpClientFactory httpClientFactory)
         {
             _authService = authService;
+            _httpClientFactory = httpClientFactory;
+        }
+
+        [HttpGet]
+        [Route("login")]
+        public IActionResult Login(string returnUrl = "/")
+        {
+            ViewData["Title"] = "Sign In";
+            return Challenge(new AuthenticationProperties
+            {
+                RedirectUri = "/",
+            }, 
+            OpenIdConnectDefaults.AuthenticationScheme);
         }
         
         [HttpGet]
@@ -22,16 +41,29 @@ namespace CustomerSite.Controllers
             ViewData["Title"] = "Create Account";
             return View(model);
         }
+        
+        
+        [HttpGet]
+        [Route("logout")]
+        public IActionResult Logout()
+        {
+            // Remove the [ValidateAntiForgeryToken] attribute from the method
+            return SignOut(
+                new AuthenticationProperties
+                {
+                    RedirectUri = Url.Action("Index", "Home")
+                },
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                OpenIdConnectDefaults.AuthenticationScheme);
+        }
 
         [HttpGet]
-        [Route("login")]
-        public IActionResult Login()
+        [Route("profile")]
+        public IActionResult Profile()
         {
-            var model = new LoginUserRequest();
-            ViewData["Title"] = "Login";
-            return View(model);
+            return View(User.Claims);
         }
-        
+
         [HttpGet]
         [Route("confirm-email")]
         public IActionResult ConfirmEmail()
@@ -40,15 +72,13 @@ namespace CustomerSite.Controllers
             ViewData["Email"] = TempData["Email"]?.ToString();
             return View();
         }
-        
+
         [HttpGet]
         [Route("confirm-email-callback")]
         public IActionResult ConfirmEmailCallback(string userId, string token)
         {
             return View();
         }
-        
-        
 
         [HttpPost]
         [Route("create-account")]
@@ -61,35 +91,31 @@ namespace CustomerSite.Controllers
                 ViewData["LastNameError"] = ModelState["LastName"]?.Errors.FirstOrDefault()?.ErrorMessage;
                 ViewData["EmailError"] = ModelState["Email"]?.Errors.FirstOrDefault()?.ErrorMessage;
                 ViewData["PasswordError"] = ModelState["Password"]?.Errors.FirstOrDefault()?.ErrorMessage;
-
                 ViewData["Title"] = "Create Account";
                 return View(registerUserRequest);
             }
-            
+
             var response = await _authService.RegisterAsync(registerUserRequest);
-            
             if (response.Succeeded)
             {
                 TempData["Email"] = registerUserRequest.Email;
                 return RedirectToAction("ConfirmEmail");
             }
-            
+
             ViewData["FirstNameError"] = ModelState["FirstName"]?.Errors.FirstOrDefault()?.ErrorMessage;
             ViewData["LastNameError"] = ModelState["LastName"]?.Errors.FirstOrDefault()?.ErrorMessage;
             ViewData["EmailError"] = ModelState["Email"]?.Errors.FirstOrDefault()?.ErrorMessage;
             ViewData["PasswordError"] = ModelState["Password"]?.Errors.FirstOrDefault()?.ErrorMessage;
-            
             ViewData["Title"] = "Create Account";
             return View(registerUserRequest);
         }
-        
+
         [HttpPost]
         [Route("resend-confirmation-email")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResendConfirmationEmail(string email)
         {
             var response = await _authService.ResendConfirmationEmailAsync(email);
-            
             if (response.Succeeded)
             {
                 TempData["Email"] = email;
@@ -101,19 +127,20 @@ namespace CustomerSite.Controllers
         }
         
         [HttpPost]
+        [Route("oauth/{provider}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(LoginUserRequest loginUserRequest)
+        public IActionResult OAuthLogin(string provider, string returnUrl)
         {
-            if (ModelState.IsValid)
+            if (provider.ToLower() != "google")
             {
-                return RedirectToAction("Index", "Home");
+                return BadRequest("Unsupported provider.");
             }
 
-            ViewData["EmailError"] = ModelState["Email"]?.Errors.FirstOrDefault()?.ErrorMessage;
-            ViewData["PasswordError"] = ModelState["Password"]?.Errors.FirstOrDefault()?.ErrorMessage;
-
-            ViewData["Title"] = "Login";
-            return View(loginUserRequest);
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = returnUrl ?? Url.Action("Index", "Home")
+            };
+            return Challenge(properties, "Google");
         }
     }
 }

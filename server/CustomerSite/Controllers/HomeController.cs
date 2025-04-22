@@ -6,17 +6,20 @@ namespace CustomerSite.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
 
         public IActionResult Index()
         {
-            return View();
+            var model = new HomeIndexViewModel
+            {
+                Email = User.FindFirst("email")?.Value
+            };
+            return View(model);
         }
         
+        
+        public class HomeIndexViewModel
+        {
+            public string Email { get; set; }
+        }
     }
 }
