@@ -14,15 +14,12 @@ namespace Domain.Entities
         public Guid CategoryId { get; set; }
         public required string Name { get; set; }
         public string? Description { get; set; }
-        public decimal Price { get; set; }
-        public int Stock { get; set; }
+        public bool IsParent { get; set; } = true;
+    
         public Category Category { get; set; }
+        public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
-        public ICollection<ProductCustomOption> ProductCustomOptions { get; set; } = new List<ProductCustomOption>();
-        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
-        public ICollection<Cart> CartItems { get; set; } = new List<Cart>();
-        public ICollection<DiscountProduct> DiscountProducts { get; set; } = new List<DiscountProduct>();
         public ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
-        public ICollection<Wishlist> WishlistItems { get; set; } = new List<Wishlist>();
+        public ICollection<ProductVariantAttribute> VariantAttributes { get; set; } = new List<ProductVariantAttribute>();
     }
 }

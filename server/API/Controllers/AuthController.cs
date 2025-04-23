@@ -173,6 +173,7 @@ namespace API.Controllers
             identity.AddClaim(new Claim("user_id", user.Id.ToString()));
             identity.AddClaim(new Claim("first_name", user.FirstName ?? string.Empty));
             identity.AddClaim(new Claim("last_name", user.LastName ?? string.Empty));
+            identity.AddClaim(new Claim("email", user.Email ?? string.Empty));
 
             return principal;
         }

@@ -13,9 +13,12 @@ namespace Domain.Entities
         [Key]   
         public Guid Id { get; set; }
         public Guid ProductId { get; set; }
+        public Guid? ProductVariantId { get; set; }
         public string ImageUrl { get; set; }
         public bool IsPrimary { get; set; }
         public string? Description { get; set; }
+    
         public Product Product { get; set; }
+        public ProductVariant ProductVariant { get; set; }
     }
 }

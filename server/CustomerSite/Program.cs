@@ -53,8 +53,10 @@ namespace CustomerSite
                 options.Scope.Add("email");
                 options.Scope.Add("roles");
                 options.Scope.Add("api");
+                options.Scope.Add("offline_access");
                 options.CallbackPath = "/signin-oidc";
                 options.SignedOutCallbackPath = "/signout-callback-oidc";
+                
                 
             });
 

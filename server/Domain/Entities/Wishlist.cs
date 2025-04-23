@@ -13,8 +13,11 @@ namespace Domain.Entities
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public Guid ProductId { get; set; }
+        public Guid ProductVariantId { get; set; }
         public DateTime AddedDate { get; set; }
+    
         public User User { get; set; }
         public Product Product { get; set; }
+        public ProductVariant ProductVariant { get; set; }
     }
 }

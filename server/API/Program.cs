@@ -2,10 +2,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
 using Application.Interfaces.Auth;
+using Application.Interfaces.Categories;
 using Application.Services.Auth;
+using Application.Services.Categories;
 using Domain.Entities;
 using DotNetEnv;
 using Infrastructure.Data;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
@@ -21,7 +24,7 @@ namespace API
             // Register DBContext
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+            builder.Services.AddAutoMapper(typeof(Program).Assembly, typeof(CategoryService).Assembly);
             // Add Razor Pages support
             builder.Services.AddRazorPages();
 
@@ -61,13 +64,11 @@ namespace API
                 options.SlidingExpiration = true;
             });
 
-            builder.Services.AddOpenIddict()
-                .AddCore(options =>
+            builder.Services.AddOpenIddict().AddCore(options =>
                 {
                     options.UseEntityFrameworkCore()
                            .UseDbContext<AppDbContext>();
-                })
-                .AddServer(options =>
+                }).AddServer(options =>
                 {
                     options.AllowAuthorizationCodeFlow()
                            .AllowRefreshTokenFlow();
@@ -100,8 +101,11 @@ namespace API
 
             // Register Services
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IEmailSender, EmailSender>();
             builder.Services.AddScoped<DbSeeder>();
+            builder.Services.AddScoped<OpenIdSeeder>();
 
             // Configure OAuth providers
             builder.Services.AddAuthentication()
@@ -146,8 +150,9 @@ namespace API
             using (var scope = app.Services.CreateScope())
             {
                 var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+                var openIdSeeder = scope.ServiceProvider.GetRequiredService<OpenIdSeeder>();
                 await seeder.SeedAsync();
-                await SeedOpenIddictDataAsync(scope.ServiceProvider);
+                await openIdSeeder.SeedOpenIddictDataAsync(scope.ServiceProvider);
             }
 
             if (app.Environment.IsDevelopment())
@@ -162,68 +167,9 @@ namespace API
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-            app.MapRazorPages(); // Add Razor Pages routing
+            app.MapRazorPages(); // Add Razor Pages
 
             app.Run();
-        }
-
-        // SeedOpenIddictDataAsync (unchanged)
-        private static async Task SeedOpenIddictDataAsync(IServiceProvider serviceProvider)
-        {
-            var manager = serviceProvider.GetRequiredService<IOpenIddictApplicationManager>();
-            var existingCustomerClient = await manager.FindByClientIdAsync("customer-web-client");
-            if (existingCustomerClient == null)
-            {
-                await manager.CreateAsync(new OpenIddictApplicationDescriptor
-                {
-                    ClientId = "customer-web-client",
-                    ClientSecret = "customer-secret",
-                    DisplayName = "Customer Web Portal",
-                    RedirectUris = { new Uri("https://localhost:7001/signin-oidc") },
-                    PostLogoutRedirectUris = { new Uri("https://localhost:7001/signout-callback-oidc") },
-                    Permissions =
-                    {   
-                        OpenIddictConstants.Permissions.Endpoints.Authorization,
-                        OpenIddictConstants.Permissions.Endpoints.Token,
-                        OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-                        OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                        OpenIddictConstants.Permissions.ResponseTypes.Code,
-                        
-                        OpenIddictConstants.Permissions.Scopes.Email,
-                        OpenIddictConstants.Permissions.Scopes.Profile,
-                        OpenIddictConstants.Permissions.Scopes.Roles,
-                        OpenIddictConstants.Permissions.Prefixes.Scope + "api",
-                    }
-                });
-            }
-            var existingAdminClient = await manager.FindByClientIdAsync("admin-web-client");
-            if (existingAdminClient == null)
-            {
-                await manager.CreateAsync(new OpenIddictApplicationDescriptor
-                {
-                    ClientId = "admin-web-client",
-                    DisplayName = "Admin Portal",
-                    RedirectUris = { new Uri("http://localhost:5173/callback") },
-                    PostLogoutRedirectUris = { new Uri("http://localhost:5173/logout-callback") },
-                    Permissions =
-                    {
-                        OpenIddictConstants.Permissions.Endpoints.Authorization,
-                        OpenIddictConstants.Permissions.Endpoints.Token,
-                        OpenIddictConstants.Permissions.Endpoints.EndSession,
-                        OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-                        OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                        OpenIddictConstants.Permissions.Scopes.Email,
-                        OpenIddictConstants.Permissions.Scopes.Profile,
-                        OpenIddictConstants.Permissions.Scopes.Roles,
-                        OpenIddictConstants.Permissions.Prefixes.Scope + "api",
-                        OpenIddictConstants.Permissions.ResponseTypes.Code
-                    },
-                    Requirements =
-                    {
-                        OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange
-                    }
-                });
-            }
         }
     }
 }

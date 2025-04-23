@@ -6,20 +6,16 @@ namespace CustomerSite.Controllers
 {
     public class HomeController : Controller
     {
-
         public IActionResult Index()
         {
-            var model = new HomeIndexViewModel
-            {
-                Email = User.FindFirst("email")?.Value
-            };
-            return View(model);
+            return View();
         }
-        
-        
-        public class HomeIndexViewModel
+    
+        public IActionResult Shop()
         {
-            public string Email { get; set; }
+            return View();
         }
+        
+
     }
 }

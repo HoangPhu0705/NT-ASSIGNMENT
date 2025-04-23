@@ -47,7 +47,6 @@ namespace CustomerSite.Controllers
         [Route("logout")]
         public IActionResult Logout()
         {
-            // Remove the [ValidateAntiForgeryToken] attribute from the method
             return SignOut(
                 new AuthenticationProperties
                 {
@@ -61,6 +60,10 @@ namespace CustomerSite.Controllers
         [Route("profile")]
         public IActionResult Profile()
         {
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine($"Claim Type: {claim.Type}, Value: {claim.Value}");
+            }
             return View(User.Claims);
         }
 

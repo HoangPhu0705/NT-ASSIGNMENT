@@ -67,28 +67,26 @@
 </head>
 <body>
     <div class="container">
-        <h1>User Profile</h1>
         @if (User.Identity.IsAuthenticated)
         {
             <div class="card">
-                <h2>Your Details</h2>
-                <p>Email: <span class="email-highlight">@User.FindFirst("name")?.Value mmm</span></p>
-                <h3>All Claims</h3>
-                <table>
+                <h2>Your Profile</h2>
+                <h3>User Claims</h3>
+                <table class="table">
                     <thead>
-                        <tr>
-                            <th>Claim Type</th>
-                            <th>Claim Value</th>
-                        </tr>
+                    <tr>
+                        <th>Type</th>
+                        <th>Value</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        @foreach (var claim in Model)
-                        {
-                            <tr>
-                                <td>@claim.Type</td>
-                                <td>@claim.Value</td>
-                            </tr>
-                        }
+                    @foreach (var claim in Model)
+                    {
+                        <tr>
+                            <td>@claim.Type</td>
+                            <td>@claim.Value</td>
+                        </tr>
+                    }
                     </tbody>
                 </table>
                 <!-- Logout Button -->

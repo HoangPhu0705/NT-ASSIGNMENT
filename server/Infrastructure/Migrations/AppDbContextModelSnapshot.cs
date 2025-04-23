@@ -28,13 +28,13 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CustomValueId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("DiscountId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductVariantId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
@@ -45,11 +45,11 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomValueId");
-
                     b.HasIndex("DiscountId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
 
                     b.HasIndex("UserId");
 
@@ -63,27 +63,42 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid?>("ParentCategoryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name");
+
                     b.HasIndex("ParentCategoryId");
 
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Domain.Entities.CustomOption", b =>
+            modelBuilder.Entity("Domain.Entities.CategoryAttribute", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsFilterable")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -91,32 +106,14 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CustomOptions");
-                });
+                    b.HasIndex("CategoryId");
 
-            modelBuilder.Entity("Domain.Entities.CustomValue", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductCustomOptionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductCustomOptionId");
-
-                    b.ToTable("CustomValues");
+                    b.ToTable("CategoryAttributes");
                 });
 
             modelBuilder.Entity("Domain.Entities.Discount", b =>
                 {
-                    b.Property<Guid>("IdRecordingId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -148,33 +145,12 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("IdRecordingId");
+                    b.HasKey("Id");
 
                     b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Discounts");
-                });
-
-            modelBuilder.Entity("Domain.Entities.DiscountProduct", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("DiscountId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DiscountId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("DiscountProducts");
                 });
 
             modelBuilder.Entity("Domain.Entities.Order", b =>
@@ -241,6 +217,8 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OrderDate");
+
                     b.HasIndex("ShippingMethodId");
 
                     b.HasIndex("UserId");
@@ -252,9 +230,6 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CustomValueId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("DiscountId")
@@ -270,6 +245,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
@@ -279,13 +257,13 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomValueId");
-
                     b.HasIndex("DiscountId");
 
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("OrderItems");
                 });
@@ -342,43 +320,20 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsParent")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Stock")
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("Name");
+
                     b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ProductCustomOption", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CustomOptionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomOptionId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductCustomOptions");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductImage", b =>
@@ -400,9 +355,14 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ProductVariantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("ProductImages");
                 });
@@ -438,6 +398,64 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ProductReviews");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SKU")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SKU")
+                        .IsUnique();
+
+                    b.ToTable("ProductVariants");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ProductVariantAttribute", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryAttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryAttributeId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductVariantAttributes");
                 });
 
             modelBuilder.Entity("Domain.Entities.ShippingMethod", b =>
@@ -542,6 +560,31 @@ namespace Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.VariantAttributeValue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductVariantAttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantAttributeId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("VariantAttributeValues");
+                });
+
             modelBuilder.Entity("Domain.Entities.Wishlist", b =>
                 {
                     b.Property<Guid>("Id")
@@ -554,12 +597,17 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
 
                     b.HasIndex("UserId");
 
@@ -910,18 +958,21 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Cart", b =>
                 {
-                    b.HasOne("Domain.Entities.CustomValue", "CustomValue")
-                        .WithMany("CartItems")
-                        .HasForeignKey("CustomValueId");
-
                     b.HasOne("Domain.Entities.Discount", "Discount")
                         .WithMany("CartItems")
-                        .HasForeignKey("DiscountId");
+                        .HasForeignKey("DiscountId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany("CartItems")
+                        .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("CartItems")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.User", "User")
@@ -930,11 +981,11 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CustomValue");
-
                     b.Navigation("Discount");
 
                     b.Navigation("Product");
+
+                    b.Navigation("ProductVariant");
 
                     b.Navigation("User");
                 });
@@ -949,34 +1000,14 @@ namespace Infrastructure.Migrations
                     b.Navigation("ParentCategory");
                 });
 
-            modelBuilder.Entity("Domain.Entities.CustomValue", b =>
+            modelBuilder.Entity("Domain.Entities.CategoryAttribute", b =>
                 {
-                    b.HasOne("Domain.Entities.ProductCustomOption", "ProductCustomOption")
-                        .WithMany("CustomValues")
-                        .HasForeignKey("ProductCustomOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Domain.Entities.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("ProductCustomOption");
-                });
-
-            modelBuilder.Entity("Domain.Entities.DiscountProduct", b =>
-                {
-                    b.HasOne("Domain.Entities.Discount", "Discount")
-                        .WithMany("DiscountProducts")
-                        .HasForeignKey("DiscountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany("DiscountProducts")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Discount");
-
-                    b.Navigation("Product");
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("Domain.Entities.Order", b =>
@@ -1000,13 +1031,10 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.OrderItem", b =>
                 {
-                    b.HasOne("Domain.Entities.CustomValue", "CustomValue")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("CustomValueId");
-
                     b.HasOne("Domain.Entities.Discount", "Discount")
                         .WithMany("OrderItems")
-                        .HasForeignKey("DiscountId");
+                        .HasForeignKey("DiscountId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Domain.Entities.Order", "Order")
                         .WithMany("OrderItems")
@@ -1015,18 +1043,24 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany("OrderItems")
+                        .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("CustomValue");
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Discount");
 
                     b.Navigation("Order");
 
                     b.Navigation("Product");
+
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("Domain.Entities.Payment", b =>
@@ -1053,29 +1087,10 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ProductCustomOption", b =>
-                {
-                    b.HasOne("Domain.Entities.CustomOption", "CustomOption")
-                        .WithMany("ProductCustomOptions")
-                        .HasForeignKey("CustomOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany("ProductCustomOptions")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CustomOption");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductImage", b =>
@@ -1083,10 +1098,17 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Product", "Product")
                         .WithMany("Images")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Product");
+
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductReview", b =>
@@ -1108,12 +1130,67 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
+                {
+                    b.HasOne("Domain.Entities.Product", "Product")
+                        .WithMany("Variants")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ProductVariantAttribute", b =>
+                {
+                    b.HasOne("Domain.Entities.CategoryAttribute", "CategoryAttribute")
+                        .WithMany("ProductVariantAttributes")
+                        .HasForeignKey("CategoryAttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Product", "Product")
+                        .WithMany("VariantAttributes")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CategoryAttribute");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Domain.Entities.VariantAttributeValue", b =>
+                {
+                    b.HasOne("Domain.Entities.ProductVariantAttribute", "ProductVariantAttribute")
+                        .WithMany("Values")
+                        .HasForeignKey("ProductVariantAttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("AttributeValues")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("ProductVariantAttribute");
+                });
+
             modelBuilder.Entity("Domain.Entities.Wishlist", b =>
                 {
                     b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany("WishlistItems")
+                        .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("WishlistItems")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.User", "User")
@@ -1123,6 +1200,8 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+
+                    b.Navigation("ProductVariant");
 
                     b.Navigation("User");
                 });
@@ -1209,23 +1288,14 @@ namespace Infrastructure.Migrations
                     b.Navigation("SubCategories");
                 });
 
-            modelBuilder.Entity("Domain.Entities.CustomOption", b =>
+            modelBuilder.Entity("Domain.Entities.CategoryAttribute", b =>
                 {
-                    b.Navigation("ProductCustomOptions");
-                });
-
-            modelBuilder.Entity("Domain.Entities.CustomValue", b =>
-                {
-                    b.Navigation("CartItems");
-
-                    b.Navigation("OrderItems");
+                    b.Navigation("ProductVariantAttributes");
                 });
 
             modelBuilder.Entity("Domain.Entities.Discount", b =>
                 {
                     b.Navigation("CartItems");
-
-                    b.Navigation("DiscountProducts");
 
                     b.Navigation("OrderItems");
                 });
@@ -1239,24 +1309,31 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
                 {
-                    b.Navigation("CartItems");
+                    b.Navigation("Images");
 
-                    b.Navigation("DiscountProducts");
+                    b.Navigation("Reviews");
+
+                    b.Navigation("VariantAttributes");
+
+                    b.Navigation("Variants");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
+                {
+                    b.Navigation("AttributeValues");
+
+                    b.Navigation("CartItems");
 
                     b.Navigation("Images");
 
                     b.Navigation("OrderItems");
 
-                    b.Navigation("ProductCustomOptions");
-
-                    b.Navigation("Reviews");
-
                     b.Navigation("WishlistItems");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ProductCustomOption", b =>
+            modelBuilder.Entity("Domain.Entities.ProductVariantAttribute", b =>
                 {
-                    b.Navigation("CustomValues");
+                    b.Navigation("Values");
                 });
 
             modelBuilder.Entity("Domain.Entities.ShippingMethod", b =>
