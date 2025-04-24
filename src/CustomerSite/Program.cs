@@ -57,6 +57,20 @@ namespace CustomerSite
                 options.CallbackPath = "/signin-oidc";
                 options.SignedOutCallbackPath = "/signout-callback-oidc";
                 
+
+                
+                // Map the claims from token to user identity
+                // options.ClaimActions.MapJsonKey("first_name", "first_name");
+                // options.ClaimActions.MapJsonKey("last_name", "last_name");
+                // options.ClaimActions.MapJsonKey("email", "email");
+                // options.ClaimActions.MapUniqueJsonKey("role", "role");
+                //
+                // // Set standard name and role claim types
+                // options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                // {
+                //     NameClaimType = "name",
+                //     RoleClaimType = "role"
+                // };
                 
             });
 

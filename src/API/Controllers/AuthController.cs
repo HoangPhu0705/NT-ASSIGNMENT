@@ -97,7 +97,8 @@ namespace API.Controllers
             {
                 throw new InvalidOperationException("The specified grant type is not supported.");
             }
-
+            
+            Console.WriteLine("Scopes: " + string.Join(", ", request.GetScopes()));;
             var requestedScopes = request.GetScopes();
             principal.SetScopes(requestedScopes);
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
@@ -157,6 +158,39 @@ namespace API.Controllers
                 {
                     RedirectUri = "/"
                 });
+        }
+        
+        [HttpGet("~/connect/userinfo")]
+        public async Task<IActionResult> UserInfo()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Challenge(
+                    authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                    properties: new AuthenticationProperties(new Dictionary<string, string?>
+                    {
+                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidToken,
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The specified access token is not valid."
+                    }));
+            }
+    
+            var claims = new Dictionary<string, object>
+            {
+                [OpenIddictConstants.Claims.Subject] = await _userManager.GetUserIdAsync(user),
+                [OpenIddictConstants.Claims.Email] = await _userManager.GetEmailAsync(user),
+                [OpenIddictConstants.Claims.Name] = user.UserName,
+                ["first_name"] = user.FirstName ?? string.Empty,
+                ["last_name"] = user.LastName ?? string.Empty
+            };
+    
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Any())
+            {
+                claims[OpenIddictConstants.Claims.Role] = roles.ToArray();
+            }
+    
+            return Ok(claims);
         }
 
         private async Task<ClaimsPrincipal> CreateClaimsPrincipalAsync(User user)
