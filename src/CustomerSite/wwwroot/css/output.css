@@ -3880,6 +3880,10 @@ details.collapse summary::-webkit-details-marker {
   height: 8rem;
 }
 
+.h-40 {
+  height: 10rem;
+}
+
 .h-64 {
   height: 16rem;
 }
@@ -3934,6 +3938,10 @@ details.collapse summary::-webkit-details-marker {
 
 .w-2\/3 {
   width: 66.666667%;
+}
+
+.w-40 {
+  width: 10rem;
 }
 
 .w-64 {
@@ -4558,6 +4566,40 @@ details.collapse summary::-webkit-details-marker {
   transition-duration: 500ms;
 }
 
+/* Add these rules to your site.css */
+
+.swiper-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.swiper-slide {
+  width: auto;
+  padding: 0;
+  margin: 0 !important;
+  /* Force no margins */
+  display: flex;
+  justify-content: start;
+}
+
+/* Optional: Add negative margin to the category-swiper container */
+
+.category-swiper {
+  margin: 0 -5px;
+  /* Adjust this value as needed */
+}
+
+.category-link {
+  display: block;
+  width: 140px;
+  /* Match w-40 */
+  height: 140px;
+  /* Match h-40 */
+  border-radius: 9999px;
+  /* Ensure circular shape */
+  overflow: hidden;
+}
+
 .hover\:scale-105:hover {
   --tw-scale-x: 1.05;
   --tw-scale-y: 1.05;
@@ -4781,4 +4823,3 @@ details.collapse summary::-webkit-details-marker {
   --tw-translate-x: 25%;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
-

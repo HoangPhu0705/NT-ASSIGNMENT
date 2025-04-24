@@ -48,13 +48,23 @@
             <div class="dropdown dropdown-hover dropdown-bottom dropdown-end">
                 <a href="" role="button" class="btn btn-circle mr-3 bg-transparent border-none shadow-none"><i class="hgi hgi-stroke hgi-user text-2xl"></i></a>
                 <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-72 p-6 shadow">
-                    <div class=" text-lg font-light">
-                        <span class="font-bold">
-                            One account is all you need
-                        </span>Get access to your Nextech account and so much more with <span class="font-bold">Nex ID.</span>
-                    </div>
-                    <li><a href="auth/login" class="btn mt-4 rounded-full bg-[#4CF6CF] font-bold">LOGIN</a></li>
-                    <li><a href="auth/create-account" class="btn mt-4 rounded-full bg-black text-white font-bold hover:bg-white hover:text-black">CREATE AN ACCOUNT</a></li>
+  
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <div class=" text-lg font-light">
+                            <span class="font-bold">
+                                One account is all you need
+                            </span>Get access to your Nextech account and so much more with <span class="font-bold">Nex ID.</span>
+                        </div>
+                        <li><a href="/auth/login" class="btn mt-4 rounded-full bg-[#4CF6CF] font-bold">LOGIN</a></li>
+                        <li><a href="/auth/create-account" class="btn mt-4 rounded-full bg-black text-white font-bold hover:bg-white hover:text-black">CREATE AN ACCOUNT</a></li>
+                    }else 
+                    {
+                        <li><a href="/auth/profile" class="btn mt-4 rounded-full bg-[#4CF6CF] font-bold">PROFILE</a></li>
+                        <li><a href="/auth/logout" class="btn mt-4 rounded-full bg-black text-white font-bold hover:bg-white hover:text-black">LOGOUT</a></li>
+                    }
+                   
+
                 </ul>
             </div>
 

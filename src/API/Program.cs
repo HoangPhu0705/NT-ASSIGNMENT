@@ -64,7 +64,8 @@ namespace API
                 options.SlidingExpiration = true;
             });
 
-            builder.Services.AddOpenIddict().AddCore(options =>
+            builder.Services.AddOpenIddict()
+                .AddCore(options =>
                 {
                     options.UseEntityFrameworkCore()
                            .UseDbContext<AppDbContext>();

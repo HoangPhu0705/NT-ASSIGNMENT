@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Text.Json;
 using CustomerSite.Models;
 using CustomerSite.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -56,10 +57,41 @@ namespace CustomerSite
                 options.Scope.Add("offline_access");
                 options.CallbackPath = "/signin-oidc";
                 options.SignedOutCallbackPath = "/signout-callback-oidc";
-                
 
-                
-                // Map the claims from token to user identity
+                options.Events = new OpenIdConnectEvents
+                {
+                    OnRemoteFailure = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.Redirect("/Home/Error?message=" + 
+                                                  Uri.EscapeDataString(context.Failure.Message));
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        var logger = context.HttpContext.RequestServices
+                            .GetRequiredService<ILogger<Program>>();
+                        logger.LogInformation("Token validated successfully tokennn");
+                        return Task.CompletedTask;
+                    },
+                    OnAuthorizationCodeReceived = context =>
+                    {
+                        var logger = context.HttpContext.RequestServices
+                            .GetRequiredService<ILogger<Program>>();
+                        logger.LogInformation("Authorization code received");
+                        return Task.CompletedTask;
+                    },
+                    OnTokenResponseReceived = context =>
+                    {
+                        Console.WriteLine("Access tokens: " + context.TokenEndpointResponse.AccessToken);
+                        Console.WriteLine("Refresh tokens: " + context.TokenEndpointResponse.RefreshToken);
+                        return Task.CompletedTask;
+                    },
+                };
+
+                // options.GetClaimsFromUserInfoEndpoint = true;
+
+                // // Map the claims from token to user identity
                 // options.ClaimActions.MapJsonKey("first_name", "first_name");
                 // options.ClaimActions.MapJsonKey("last_name", "last_name");
                 // options.ClaimActions.MapJsonKey("email", "email");
@@ -71,7 +103,7 @@ namespace CustomerSite
                 //     NameClaimType = "name",
                 //     RoleClaimType = "role"
                 // };
-                
+
             });
 
             builder.Services.AddLogging(logging =>

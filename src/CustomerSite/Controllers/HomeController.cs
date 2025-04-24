@@ -1,6 +1,7 @@
 using CustomerSite.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authentication;
 
 namespace CustomerSite.Controllers
 {
@@ -8,10 +9,11 @@ namespace CustomerSite.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            
+            return View(User);
         }
     
-        public IActionResult Shop()
+        public  async Task<IActionResult> Shop()
         {
             return View();
         }

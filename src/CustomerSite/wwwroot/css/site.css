@@ -35,3 +35,30 @@
 @tailwind components;
 @tailwind utilities;
 
+
+/* Add these rules to your site.css */
+.swiper-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.swiper-slide {
+    width: auto;
+    padding: 0;
+    margin: 0 !important; /* Force no margins */
+    display: flex;
+    justify-content: start;
+}
+
+/* Optional: Add negative margin to the category-swiper container */
+.category-swiper {
+    margin: 0 -5px; /* Adjust this value as needed */
+}
+
+.category-link {
+    display: block;
+    width: 140px; /* Match w-40 */
+    height: 140px; /* Match h-40 */
+    border-radius: 9999px; /* Ensure circular shape */
+    overflow: hidden;
+}

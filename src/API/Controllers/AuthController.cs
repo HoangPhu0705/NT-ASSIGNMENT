@@ -9,6 +9,7 @@ using OpenIddict.Server.AspNetCore;
 using SharedViewModels.Auth;
 using SharedViewModels.Shared;
 using System.Security.Claims;
+using System.Text.Json;
 using Domain.Entities;
 using Application.Interfaces.Auth;
 
@@ -76,7 +77,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPost("~/connect/token"), Produces("application/json")]
+       [HttpPost("~/connect/token"), Produces("application/json")]
         public async Task<IActionResult> Exchange()
         {
             var request = HttpContext.GetOpenIddictServerRequest() ??
@@ -92,15 +93,15 @@ namespace API.Controllers
                 if (!await _signInManager.CanSignInAsync(user))
                     return ForbidWithError(OpenIddictConstants.Errors.AccessDenied, "The user is no longer allowed to sign in.");
                 principal = await CreateClaimsPrincipalAsync(user);
+                var requestedScopes = request.GetScopes();
+                principal.SetScopes(requestedScopes);
+
             }
             else
             {
                 throw new InvalidOperationException("The specified grant type is not supported.");
             }
-            
-            Console.WriteLine("Scopes: " + string.Join(", ", request.GetScopes()));;
-            var requestedScopes = request.GetScopes();
-            principal.SetScopes(requestedScopes);
+
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
@@ -126,7 +127,7 @@ namespace API.Controllers
         {
             var request = HttpContext.GetOpenIddictServerRequest() ??
                           throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
-
+            
             var result = await HttpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
 
             if (!result.Succeeded)
@@ -144,6 +145,12 @@ namespace API.Controllers
                        throw new InvalidOperationException("The user details cannot be retrieved.");
 
             var principal = await CreateClaimsPrincipalAsync(user);
+
+            // Explicitly set the requested scopes
+            var requestedScopes = request.GetScopes();
+
+            principal.SetScopes(requestedScopes);
+
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
@@ -163,6 +170,7 @@ namespace API.Controllers
         [HttpGet("~/connect/userinfo")]
         public async Task<IActionResult> UserInfo()
         {
+            Console.WriteLine("Vo dc info nha");
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {

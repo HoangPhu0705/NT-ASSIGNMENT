@@ -6,9 +6,12 @@
     <title>@ViewData["Title"]</title>
     <html data-theme="light"></html>
     <link rel="stylesheet" href="https://cdn.hugeicons.com/font/hgi-stroke-rounded.css" />
+    <link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet"/>
     
     <link rel="icon" type="image/png" href="~/favicon-32x32.png" />
     <link rel="stylesheet" href="~/css/output.css" asp-append-version="true" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="~/js/swiper-init.js" asp-append-version="true"></script>
 </head>
 <body class="flex flex-col min-h-screen">
 <header>
@@ -128,6 +131,7 @@
     </nav>
 </footer>
 
+
 @* Script to toggle shop-menu visibility *@
 <script>
     const shopLink = document.getElementById('shop-link');
@@ -163,5 +167,6 @@
         }
     });
 </script>
+
 </body>
 </html>

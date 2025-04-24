@@ -13,12 +13,10 @@ namespace CustomerSite.Controllers
     public class AuthController : Controller
     {
         private readonly AuthService _authService;
-        private readonly IHttpClientFactory _httpClientFactory;
 
-        public AuthController(AuthService authService, IHttpClientFactory httpClientFactory)
+        public AuthController(AuthService authService)
         {
             _authService = authService;
-            _httpClientFactory = httpClientFactory;
         }
 
         [HttpGet]

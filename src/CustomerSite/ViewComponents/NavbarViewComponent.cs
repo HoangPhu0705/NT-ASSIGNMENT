@@ -6,6 +6,6 @@ public class NavbarViewComponent : ViewComponent
 {
     public IViewComponentResult Invoke()
     {
-        return View();
+        return View(User);
     }
 }

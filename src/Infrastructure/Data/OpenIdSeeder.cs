@@ -24,13 +24,17 @@ public class OpenIdSeeder
                     OpenIddictConstants.Permissions.Endpoints.Authorization,
                     OpenIddictConstants.Permissions.Endpoints.Token,
                     OpenIddictConstants.Permissions.Endpoints.EndSession,
+                    
                     OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
                     OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                    
                     OpenIddictConstants.Permissions.ResponseTypes.Code,
                     
                     OpenIddictConstants.Permissions.Scopes.Email,
                     OpenIddictConstants.Permissions.Scopes.Profile,
                     OpenIddictConstants.Permissions.Scopes.Roles,
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "offline_access",
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "open_id",
                     OpenIddictConstants.Permissions.Prefixes.Scope + "api",
                 }
             });
@@ -49,12 +53,17 @@ public class OpenIdSeeder
                     OpenIddictConstants.Permissions.Endpoints.Authorization,
                     OpenIddictConstants.Permissions.Endpoints.Token,
                     OpenIddictConstants.Permissions.Endpoints.EndSession,
+                    
                     OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
                     OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                    
                     OpenIddictConstants.Permissions.Scopes.Email,
                     OpenIddictConstants.Permissions.Scopes.Profile,
                     OpenIddictConstants.Permissions.Scopes.Roles,
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "offline_access",
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "open_id",
                     OpenIddictConstants.Permissions.Prefixes.Scope + "api",
+                    
                     OpenIddictConstants.Permissions.ResponseTypes.Code
                 },
                 Requirements =
