@@ -12,14 +12,14 @@ public class MappingProfile : Profile
         CreateMap<Category, CategoryDto>();
         CreateMap<Category, CategoryDetailDto>();
         
-        CreateMap<Domain.Entities.Product, ProductDto>()
+        CreateMap<Product, ProductDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null));
 
-        CreateMap<Domain.Entities.Product, ProductDetailDto>()
+        CreateMap<Product, ProductDetailDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null));
 
-        CreateMap<CreateProductRequest, Domain.Entities.Product>();
-        CreateMap<UpdateProductRequest, Domain.Entities.Product>();
+        CreateMap<CreateProductRequest, Product>();
+        CreateMap<UpdateProductRequest, Product>();
         
         CreateMap<ProductImage, ProductImageDto>();
         CreateMap<CreateProductImageRequest, ProductImage>();

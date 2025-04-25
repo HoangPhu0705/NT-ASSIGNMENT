@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
 using Application.Interfaces.Auth;
 using Application.Interfaces.Categories;
+using Application.Interfaces.Products;
 using Application.Services.Auth;
 using Application.Services.Categories;
+using Application.Services.Product;
 using Domain.Entities;
 using DotNetEnv;
 using Infrastructure.Data;
@@ -101,10 +103,15 @@ namespace API
                 });
 
             // Register Services
-            builder.Services.AddScoped<IAuthService, AuthService>();
+            //Repository
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<IProductRepository, ProductRepository>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IEmailSender, EmailSender>();
+            
+            //Seeders
             builder.Services.AddScoped<DbSeeder>();
             builder.Services.AddScoped<OpenIdSeeder>();
 

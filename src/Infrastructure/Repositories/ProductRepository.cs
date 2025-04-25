@@ -51,9 +51,34 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> DeleteAsync(Guid id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.Products
+                .Include(p => p.Images)
+                .Include(p => p.Variants)
+                .ThenInclude(v => v.AttributeValues)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (product == null)
                 return false;
+
+            // Remove images first
+            if (product.Images != null && product.Images.Any())
+            {
+                _context.ProductImages.RemoveRange(product.Images);
+            }
+
+            // Remove variants and their attributes
+            if (product.Variants != null && product.Variants.Any())
+            {
+                foreach (var variant in product.Variants)
+                {
+                    if (variant.AttributeValues != null && variant.AttributeValues.Any())
+                    {
+                        _context.Set<VariantAttributeValue>().RemoveRange(variant.AttributeValues);
+                    }
+                }
+                _context.ProductVariants.RemoveRange(product.Variants);
+            }
+
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
