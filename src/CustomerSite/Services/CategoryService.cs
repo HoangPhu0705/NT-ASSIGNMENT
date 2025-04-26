@@ -14,13 +14,12 @@ public class CategoryService
     
     public async Task<ApiResponse<List<CategoryDto>>> GetCategoriesAsync()
     {
-        var response = await _httpClient.GetAsync("api/categories");
-        Console.WriteLine(response.StatusCode);
+        var response = await _httpClient.GetAsync("api/category");
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadFromJsonAsync<ApiResponse<List<CategoryDto>>>();
         }
-
+        
         var errorResponse = await response.Content.ReadFromJsonAsync<ApiResponse<List<CategoryDto>>>();
         return errorResponse ?? ApiResponse<List<CategoryDto>>.Error("Failed to fetch categories.");
     }

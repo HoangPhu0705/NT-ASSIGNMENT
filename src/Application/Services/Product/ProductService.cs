@@ -1,5 +1,6 @@
 using Application.Interfaces.Products;
 using AutoMapper;
+using Domain.Entities;
 using SharedViewModels.Product;
 using SharedViewModels.Shared;
 
@@ -51,14 +52,51 @@ public class ProductService : IProductService
     {
         var product = await _productRepository.GetByIdAsync(id);
         if (product == null)
-            return ApiResponse<ProductDetailDto>.Error("Product not found");
+            return ApiResponse<ProductDetailDto>.Error($"Product with ID {id} not found");
 
-        _mapper.Map(request, product);
+        if (request.Name != null) product.Name = request.Name;
+        if (request.Description != null) product.Description = request.Description;
+        if (request.CategoryId.HasValue) product.CategoryId = request.CategoryId.Value;
+
+        if (request.Images != null && request.Images.Any())
+        {
+            // Process existing images - update or mark for deletion
+            foreach (var existingImage in product.Images.ToList())
+            {
+                var updatedImage = request.Images.FirstOrDefault(i => i.Id == existingImage.Id);
+
+                if (updatedImage == null || updatedImage.IsDeleted)
+                {
+                    product.Images.Remove(existingImage);
+                }
+                else
+                {
+                    existingImage.ImageUrl = updatedImage.ImageUrl;
+                    existingImage.IsPrimary = updatedImage.IsMain;
+                }
+            }
+
+            // Add new images
+            foreach (var newImage in request.Images.Where(i => i.Id == null && !i.IsDeleted))
+            {
+                product.Images.Add(new ProductImage
+                {
+                    ProductId = product.Id,
+                    ImageUrl = newImage.ImageUrl,
+                    IsPrimary = newImage.IsMain
+                });
+            }
+
+            if (product.Images.Any() && !product.Images.Any(i => i.IsPrimary))
+            {
+                product.Images.First().IsPrimary = true;
+            }
+        }
+        
         await _productRepository.UpdateAsync(product);
-
+        
         var updatedProduct = await _productRepository.GetByIdAsync(id);
         var productDto = _mapper.Map<ProductDetailDto>(updatedProduct);
-
         return ApiResponse<ProductDetailDto>.Success(productDto);
     }
 

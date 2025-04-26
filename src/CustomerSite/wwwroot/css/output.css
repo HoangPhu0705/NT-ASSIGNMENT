@@ -1069,6 +1069,110 @@ html {
   background-color: var(--fallback-bc,oklch(var(--bc)/0.1));
 }
 
+.drawer {
+  position: relative;
+  display: grid;
+  grid-auto-columns: max-content auto;
+  width: 100%;
+}
+
+.drawer-content {
+  grid-column-start: 2;
+  grid-row-start: 1;
+  min-width: 0px;
+}
+
+.drawer-side {
+  pointer-events: none;
+  position: fixed;
+  inset-inline-start: 0px;
+  top: 0px;
+  grid-column-start: 1;
+  grid-row-start: 1;
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-rows: repeat(1, minmax(0, 1fr));
+  align-items: flex-start;
+  justify-items: start;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.drawer-side > .drawer-overlay {
+  position: sticky;
+  top: 0px;
+  place-self: stretch;
+  cursor: pointer;
+  background-color: transparent;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+.drawer-side > * {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+
+.drawer-side > *:not(.drawer-overlay) {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  transition-duration: 300ms;
+  will-change: transform;
+  transform: translateX(-100%);
+}
+
+[dir="rtl"] .drawer-side > *:not(.drawer-overlay) {
+  transform: translateX(100%);
+}
+
+.drawer-toggle {
+  position: fixed;
+  height: 0px;
+  width: 0px;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  opacity: 0;
+}
+
+.drawer-toggle:checked ~ .drawer-side {
+  pointer-events: auto;
+  visibility: visible;
+  overflow-y: auto;
+}
+
+.drawer-toggle:checked ~ .drawer-side > *:not(.drawer-overlay) {
+  transform: translateX(0%);
+}
+
+.drawer-end > .drawer-toggle ~ .drawer-content {
+  grid-column-start: 1;
+}
+
+.drawer-end > .drawer-toggle ~ .drawer-side {
+  grid-column-start: 2;
+  justify-items: end;
+}
+
+.drawer-end > .drawer-toggle ~ .drawer-side > *:not(.drawer-overlay) {
+  transform: translateX(100%);
+}
+
+[dir="rtl"] .drawer-end > .drawer-toggle ~ .drawer-side > *:not(.drawer-overlay) {
+  transform: translateX(-100%);
+}
+
+.drawer-end > .drawer-toggle:checked ~ .drawer-side > *:not(.drawer-overlay) {
+  transform: translateX(0%);
+}
+
 .dropdown {
   position: relative;
   display: inline-block;
@@ -2347,6 +2451,16 @@ details.collapse summary::-webkit-details-marker {
   gap: 1rem;
 }
 
+.drawer-toggle:checked ~ .drawer-side > .drawer-overlay {
+  background-color: #0006;
+}
+
+.drawer-toggle:focus-visible ~ .drawer-content label.drawer-button {
+  outline-style: solid;
+  outline-width: 2px;
+  outline-offset: 2px;
+}
+
 .dropdown.dropdown-open .dropdown-content,
 .dropdown:focus .dropdown-content,
 .dropdown:focus-within .dropdown-content {
@@ -3290,6 +3404,41 @@ details.collapse summary::-webkit-details-marker {
   width: 0.125rem;
 }
 
+.drawer-open > .drawer-toggle {
+  display: none;
+}
+
+.drawer-open > .drawer-toggle ~ .drawer-side {
+  pointer-events: auto;
+  visibility: visible;
+  position: sticky;
+  display: block;
+  width: auto;
+  overscroll-behavior: auto;
+}
+
+.drawer-open > .drawer-toggle ~ .drawer-side > *:not(.drawer-overlay) {
+  transform: translateX(0%);
+}
+
+[dir="rtl"] .drawer-open > .drawer-toggle ~ .drawer-side > *:not(.drawer-overlay) {
+  transform: translateX(0%);
+}
+
+.drawer-open > .drawer-toggle:checked ~ .drawer-side {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.drawer-open > .drawer-side {
+  overflow-y: auto;
+}
+
+html:has(.drawer-toggle:checked) {
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+}
+
 .join.join-vertical {
   flex-direction: column;
 }
@@ -3469,6 +3618,11 @@ details.collapse summary::-webkit-details-marker {
   margin-bottom: 0px;
   height: auto;
   width: 1rem;
+}
+
+.drawer-open > .drawer-toggle ~ .drawer-side > .drawer-overlay {
+  cursor: default;
+  background-color: transparent;
 }
 
 .join.join-vertical > :where(*:not(:first-child)) {
@@ -3676,6 +3830,10 @@ details.collapse summary::-webkit-details-marker {
   left: 0px;
 }
 
+.left-4 {
+  left: 1rem;
+}
+
 .right-0 {
   right: 0px;
 }
@@ -3704,6 +3862,10 @@ details.collapse summary::-webkit-details-marker {
   top: 0.75rem;
 }
 
+.top-4 {
+  top: 1rem;
+}
+
 .top-40 {
   top: 10rem;
 }
@@ -3730,6 +3892,22 @@ details.collapse summary::-webkit-details-marker {
 
 .z-\[1\] {
   z-index: 1;
+}
+
+.col-span-1 {
+  grid-column: span 1 / span 1;
+}
+
+.col-span-2 {
+  grid-column: span 2 / span 2;
+}
+
+.row-span-1 {
+  grid-row: span 1 / span 1;
+}
+
+.row-span-2 {
+  grid-row: span 2 / span 2;
 }
 
 .mb-0\.5 {
@@ -3792,8 +3970,16 @@ details.collapse summary::-webkit-details-marker {
   margin-top: 0.25rem;
 }
 
+.mt-10 {
+  margin-top: 2.5rem;
+}
+
 .mt-2 {
   margin-top: 0.5rem;
+}
+
+.mt-20 {
+  margin-top: 5rem;
 }
 
 .mt-4 {
@@ -3880,10 +4066,6 @@ details.collapse summary::-webkit-details-marker {
   height: 8rem;
 }
 
-.h-40 {
-  height: 10rem;
-}
-
 .h-64 {
   height: 16rem;
 }
@@ -3894,6 +4076,10 @@ details.collapse summary::-webkit-details-marker {
 
 .h-\[1px\] {
   height: 1px;
+}
+
+.h-\[40rem\] {
+  height: 40rem;
 }
 
 .h-\[50vh\] {
@@ -3916,12 +4102,32 @@ details.collapse summary::-webkit-details-marker {
   height: 100%;
 }
 
+.h-48 {
+  height: 12rem;
+}
+
+.h-96 {
+  height: 24rem;
+}
+
+.h-72 {
+  height: 18rem;
+}
+
 .min-h-\[60px\] {
   min-height: 60px;
 }
 
+.min-h-full {
+  min-height: 100%;
+}
+
 .min-h-screen {
   min-height: 100vh;
+}
+
+.\!w-\[30\%\] {
+  width: 30% !important;
 }
 
 .w-0 {
@@ -3940,8 +4146,12 @@ details.collapse summary::-webkit-details-marker {
   width: 66.666667%;
 }
 
-.w-40 {
-  width: 10rem;
+.w-3\/4 {
+  width: 75%;
+}
+
+.w-52 {
+  width: 13rem;
 }
 
 .w-64 {
@@ -3976,12 +4186,28 @@ details.collapse summary::-webkit-details-marker {
   width: 100vw;
 }
 
+.w-auto {
+  width: auto;
+}
+
+.w-\[30rem\] {
+  width: 30rem;
+}
+
+.min-w-0 {
+  min-width: 0px;
+}
+
 .max-w-md {
   max-width: 28rem;
 }
 
 .max-w-xl {
   max-width: 36rem;
+}
+
+.max-w-full {
+  max-width: 100%;
 }
 
 .flex-1 {
@@ -4039,8 +4265,16 @@ details.collapse summary::-webkit-details-marker {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .grid-rows-2 {
   grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.grid-rows-3 {
+  grid-template-rows: repeat(3, minmax(0, 1fr));
 }
 
 .flex-col {
@@ -4079,6 +4313,10 @@ details.collapse summary::-webkit-details-marker {
   gap: 0.5rem;
 }
 
+.gap-3 {
+  gap: 0.75rem;
+}
+
 .gap-4 {
   gap: 1rem;
 }
@@ -4093,6 +4331,10 @@ details.collapse summary::-webkit-details-marker {
 
 .gap-8 {
   gap: 2rem;
+}
+
+.gap-10 {
+  gap: 2.5rem;
 }
 
 .space-y-2 > :not([hidden]) ~ :not([hidden]) {
@@ -4119,6 +4361,10 @@ details.collapse summary::-webkit-details-marker {
 
 .rounded {
   border-radius: 0.25rem;
+}
+
+.rounded-2xl {
+  border-radius: 1rem;
 }
 
 .rounded-box {
@@ -4165,6 +4411,11 @@ details.collapse summary::-webkit-details-marker {
   border-style: none;
 }
 
+.\!border-\[\#D7D7D7\] {
+  --tw-border-opacity: 1 !important;
+  border-color: rgb(215 215 215 / var(--tw-border-opacity, 1)) !important;
+}
+
 .border-base-200 {
   --tw-border-opacity: 1;
   border-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-border-opacity, 1)));
@@ -4173,6 +4424,11 @@ details.collapse summary::-webkit-details-marker {
 .border-gray-700 {
   --tw-border-opacity: 1;
   border-color: rgb(55 65 81 / var(--tw-border-opacity, 1));
+}
+
+.border-\[\#D7D7D7\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(215 215 215 / var(--tw-border-opacity, 1));
 }
 
 .bg-\[\#00FDCF\] {
@@ -4244,6 +4500,11 @@ details.collapse summary::-webkit-details-marker {
   background-color: transparent;
 }
 
+.bg-gray-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
+}
+
 .fill-current {
   fill: currentColor;
 }
@@ -4255,6 +4516,10 @@ details.collapse summary::-webkit-details-marker {
 
 .p-10 {
   padding: 2.5rem;
+}
+
+.p-2 {
+  padding: 0.5rem;
 }
 
 .p-4 {
@@ -4277,6 +4542,11 @@ details.collapse summary::-webkit-details-marker {
 .px-1 {
   padding-left: 0.25rem;
   padding-right: 0.25rem;
+}
+
+.px-10 {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
 }
 
 .px-12 {
@@ -4302,6 +4572,11 @@ details.collapse summary::-webkit-details-marker {
 .px-48 {
   padding-left: 12rem;
   padding-right: 12rem;
+}
+
+.px-5 {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
 .px-56 {
@@ -4339,12 +4614,21 @@ details.collapse summary::-webkit-details-marker {
   padding-bottom: 0.625rem;
 }
 
+.py-5 {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
 .pb-3 {
   padding-bottom: 0.75rem;
 }
 
 .pl-12 {
   padding-left: 3rem;
+}
+
+.pt-10 {
+  padding-top: 2.5rem;
 }
 
 .pt-20 {
@@ -4434,6 +4718,11 @@ details.collapse summary::-webkit-details-marker {
 .text-\[\#2F3132\] {
   --tw-text-opacity: 1;
   color: rgb(47 49 50 / var(--tw-text-opacity, 1));
+}
+
+.text-\[\#5C5C5C\] {
+  --tw-text-opacity: 1;
+  color: rgb(92 92 92 / var(--tw-text-opacity, 1));
 }
 
 .text-\[\#828282\] {
@@ -4566,29 +4855,6 @@ details.collapse summary::-webkit-details-marker {
   transition-duration: 500ms;
 }
 
-/* Add these rules to your site.css */
-
-.swiper-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.swiper-slide {
-  width: auto;
-  padding: 0;
-  margin: 0 !important;
-  /* Force no margins */
-  display: flex;
-  justify-content: start;
-}
-
-/* Optional: Add negative margin to the category-swiper container */
-
-.category-swiper {
-  margin: 0 -5px;
-  /* Adjust this value as needed */
-}
-
 .category-link {
   display: block;
   width: 140px;
@@ -4624,6 +4890,11 @@ details.collapse summary::-webkit-details-marker {
 .hover\:bg-\[\#2F3132\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(47 49 50 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-black:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:bg-gray-700:hover {

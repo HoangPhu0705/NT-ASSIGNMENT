@@ -29,6 +29,9 @@ public class MappingProfile : Profile
         
         CreateMap<ProductVariantAttribute, VariantAttributeDto>();
         CreateMap<CreateVariantAttributeRequest, ProductVariantAttribute>();
+        
+        CreateMap<UpdateProductImageRequest, ProductImage>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
     }
     
 }

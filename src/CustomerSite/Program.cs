@@ -20,6 +20,8 @@ namespace CustomerSite
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<AuthService>();
+            builder.Services.AddScoped<CategoryService>();
+            builder.Services.AddScoped<ProductService>();
             builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 
             builder.Services.AddHttpClient("NextechApi", (sp, client) =>
