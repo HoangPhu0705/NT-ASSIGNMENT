@@ -7,6 +7,7 @@ public interface ICategoryService
 {
     Task<ApiResponse<IEnumerable<CategoryDto>>> GetAllCategoriesAsync();
     Task<ApiResponse<CategoryDetailDto>> GetCategoryByIdAsync(Guid id);
+    Task<ApiResponse<IEnumerable<CategoryAttributeDto>>> GetCategoryAttributesAsync(Guid categoryId);
     Task<ApiResponse<CategoryDetailDto>> CreateCategoryAsync(CreateCategoryRequest request);
     Task<ApiResponse<CategoryDetailDto>> UpdateCategoryAsync(Guid id, UpdateCategoryRequest request);
     Task<ApiResponse<bool>> DeleteCategoryAsync(Guid id);

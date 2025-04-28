@@ -24,6 +24,9 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Images)
                 .Include(p => p.Variants)
+                .Include(p => p.Variants).ThenInclude(v => v.AttributeValues)
+                .ThenInclude(av => av.ProductVariantAttribute)
+                .ThenInclude(a => a.CategoryAttribute)
                 .ToListAsync();
         }
 
@@ -33,6 +36,9 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Images)
                 .Include(p => p.Variants)
+                .Include(p => p.Variants).ThenInclude(v => v.AttributeValues)
+                .ThenInclude(av => av.ProductVariantAttribute)
+                .ThenInclude(a => a.CategoryAttribute)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -96,6 +102,9 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Images)
                 .Include(p => p.Variants)
+                .Include(p => p.Variants).ThenInclude(v => v.AttributeValues)
+                .ThenInclude(av => av.ProductVariantAttribute)
+                .ThenInclude(a => a.CategoryAttribute)
                 .Where(p => p.CategoryId == categoryId)
                 .ToListAsync();
         }

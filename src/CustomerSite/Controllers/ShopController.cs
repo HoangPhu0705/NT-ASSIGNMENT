@@ -1,3 +1,4 @@
+using CustomerSite.Models;
 using CustomerSite.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,15 +21,26 @@ public class ShopController : Controller
         return View(response.Data);
     }
 
-    [Route("shop/{categoryId}")]
-    public async Task<IActionResult> ProductList(int categoryId)
+    [Route("shop/c/{categoryId}")]
+    public async Task<IActionResult> ProductList(Guid categoryId)
     {
-        return View();
+        var categoryResponse = await _categoryService.GetCategoryByIdAsync(categoryId);
+        var productsResponse = await _productService.GetProductsByCategory(categoryId);
+    
+        var viewModel = new ShopViewModel()
+        {
+            Category = categoryResponse.Data,
+            Products = productsResponse.Data
+        };
+    
+        return View(viewModel);
     }
-    
 
-    
-    
-    
+    [Route("shop/p/{productId}")]
+    public async Task<IActionResult> ProductDetail(Guid productId)
+    {
+        var productResponse = await _productService.GetProductDetail(productId);
+        return View(productResponse.Data);
+    }
     
 }

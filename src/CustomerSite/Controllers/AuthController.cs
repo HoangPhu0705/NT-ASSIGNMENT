@@ -21,8 +21,10 @@ namespace CustomerSite.Controllers
 
         [HttpGet]
         [Route("login")]
-        public IActionResult Login(string returnUrl = "/")
+        public async Task<IActionResult> Login(string returnUrl = "/")
         {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
             ViewData["Title"] = "Sign In";
             return Challenge(new AuthenticationProperties
             {
@@ -96,7 +98,7 @@ namespace CustomerSite.Controllers
                 return View(registerUserRequest);
             }
 
-            var response = await _authService.RegisterAsync(registerUserRequest);
+            var response = await _authService.RegisterAsync(registerUserRequest);   
             if (response.Succeeded)
             {
                 TempData["Email"] = registerUserRequest.Email;

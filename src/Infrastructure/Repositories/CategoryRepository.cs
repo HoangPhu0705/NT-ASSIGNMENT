@@ -29,6 +29,15 @@ public class CategoryRepository : ICategoryRepository
             .Include(c => c.SubCategories)
             .FirstOrDefaultAsync(c => c.Id == id);
     }
+    
+    public async Task<IEnumerable<CategoryAttribute>> GetCategoryAttributesAsync(Guid categoryId)
+    {
+        return await _context.CategoryAttributes
+            .Include(ca => ca.ProductVariantAttributes)
+            .ThenInclude(pva => pva.Values)
+            .Where(ca => ca.CategoryId == categoryId)
+            .ToListAsync();
+    }
 
     public async Task<Category> AddAsync(Category category)
     {

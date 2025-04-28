@@ -5,6 +5,7 @@ namespace Application.Interfaces.Categories;
 public interface ICategoryRepository
 {
     Task<IEnumerable<Category>> GetAllAsync();
+    Task<IEnumerable<CategoryAttribute>> GetCategoryAttributesAsync(Guid categoryId);
     Task<Category> GetByIdAsync(Guid id);
     Task<Category> AddAsync(Category category);
     Task UpdateAsync(Category category);

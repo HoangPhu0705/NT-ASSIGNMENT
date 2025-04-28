@@ -34,7 +34,7 @@ public class OpenIdSeeder
                     OpenIddictConstants.Permissions.Scopes.Profile,
                     OpenIddictConstants.Permissions.Scopes.Roles,
                     OpenIddictConstants.Permissions.Prefixes.Scope + "offline_access",
-                    OpenIddictConstants.Permissions.Prefixes.Scope + "open_id",
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "openid",
                     OpenIddictConstants.Permissions.Prefixes.Scope + "api",
                 }
             });
@@ -46,8 +46,8 @@ public class OpenIdSeeder
             {
                 ClientId = "admin-web-client",
                 DisplayName = "Admin Portal",
-                RedirectUris = { new Uri("http://localhost:5173/callback") },
-                PostLogoutRedirectUris = { new Uri("http://localhost:5173/logout-callback") },
+                RedirectUris = { new Uri("http://localhost:5173/signin-oidc") },
+                PostLogoutRedirectUris = { new Uri("http://localhost:5173/signout-callback-oidc") },
                 Permissions =
                 {
                     OpenIddictConstants.Permissions.Endpoints.Authorization,
@@ -61,14 +61,10 @@ public class OpenIdSeeder
                     OpenIddictConstants.Permissions.Scopes.Profile,
                     OpenIddictConstants.Permissions.Scopes.Roles,
                     OpenIddictConstants.Permissions.Prefixes.Scope + "offline_access",
-                    OpenIddictConstants.Permissions.Prefixes.Scope + "open_id",
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "openid",
                     OpenIddictConstants.Permissions.Prefixes.Scope + "api",
                     
                     OpenIddictConstants.Permissions.ResponseTypes.Code
-                },
-                Requirements =
-                {
-                    OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange
                 }
             });
         }

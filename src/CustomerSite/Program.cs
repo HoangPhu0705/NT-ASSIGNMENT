@@ -38,6 +38,7 @@ namespace CustomerSite
             })
             .AddCookie(options =>
             {
+                options.Cookie.Name = "customer_mvc_auth";
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.Cookie.SameSite = SameSiteMode.Strict;
@@ -69,13 +70,6 @@ namespace CustomerSite
                                                   Uri.EscapeDataString(context.Failure.Message));
                         return Task.CompletedTask;
                     },
-                    OnTokenValidated = context =>
-                    {
-                        var logger = context.HttpContext.RequestServices
-                            .GetRequiredService<ILogger<Program>>();
-                        logger.LogInformation("Token validated successfully tokennn");
-                        return Task.CompletedTask;
-                    },
                     OnAuthorizationCodeReceived = context =>
                     {
                         var logger = context.HttpContext.RequestServices
@@ -85,8 +79,8 @@ namespace CustomerSite
                     },
                     OnTokenResponseReceived = context =>
                     {
-                        Console.WriteLine("Access tokens: " + context.TokenEndpointResponse.AccessToken);
-                        Console.WriteLine("Refresh tokens: " + context.TokenEndpointResponse.RefreshToken);
+                        // Console.WriteLine("Access tokens: " + context.TokenEndpointResponse.AccessToken);
+                        // Console.WriteLine("Refresh tokens: " + context.TokenEndpointResponse.RefreshToken);
                         return Task.CompletedTask;
                     },
                 };

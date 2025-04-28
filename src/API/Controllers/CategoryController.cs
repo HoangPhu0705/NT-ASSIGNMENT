@@ -33,6 +33,20 @@ public class CategoryController : ControllerBase
         }
     }
     
+    [HttpGet("{id}/filters")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<CategoryAttributeDto>>>> GetCategoryFilters(Guid id)
+    {
+        try
+        {
+            var response = await _categoryService.GetCategoryAttributesAsync(id);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<string>.Error(ex.Message));
+        }
+    }
+    
     
     [HttpGet("root")]
     public async Task<ActionResult<ApiResponse<IEnumerable<CategoryDto>>>> GetRootCategories()

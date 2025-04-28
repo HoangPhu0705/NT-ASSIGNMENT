@@ -22,8 +22,9 @@ namespace API.Pages.Account
         [BindProperty]
         public LoginUserRequest Input { get; set; }
 
-        public void OnGet(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null)
         {   
+
             Console.WriteLine("get vo ne");
             Input = new LoginUserRequest
             {

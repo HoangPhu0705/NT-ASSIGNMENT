@@ -14,7 +14,7 @@ public class CategoryService
     
     public async Task<ApiResponse<List<CategoryDto>>> GetCategoriesAsync()
     {
-        var response = await _httpClient.GetAsync("api/category");
+        var response = await _httpClient.GetAsync("api/category/root");
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadFromJsonAsync<ApiResponse<List<CategoryDto>>>();
@@ -22,5 +22,17 @@ public class CategoryService
         
         var errorResponse = await response.Content.ReadFromJsonAsync<ApiResponse<List<CategoryDto>>>();
         return errorResponse ?? ApiResponse<List<CategoryDto>>.Error("Failed to fetch categories.");
+    }
+    
+    public async Task<ApiResponse<CategoryDetailDto>> GetCategoryByIdAsync(Guid categoryId)
+    {
+        var response = await _httpClient.GetAsync($"api/category/{categoryId}");
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<ApiResponse<CategoryDetailDto>>();
+        }
+        
+        var errorResponse = await response.Content.ReadFromJsonAsync<ApiResponse<CategoryDetailDto>>();
+        return errorResponse ?? ApiResponse<CategoryDetailDto>.Error("Failed to fetch category.");
     }
 }

@@ -1,3 +1,4 @@
+@model ShopViewModel
 @{
     ViewData["Title"] = "Shop";
 }
@@ -59,67 +60,55 @@
         </div>
     </div>
 
-    <!-- Grid Layout with Width and Height -->
+    
     <div class="grid grid-cols-4 grid-rows-3 gap-8 mt-5">
-        <!-- Top Row -->
-        <div class="col-span-2 row-span-1 bg-gray-200 rounded-2xl h-[27rem] min-w-0"></div> <!-- Banner (Mice) -->
-        <div class="flex flex-col justify-evenly col-span-1 row-span-1 bg-gray-200 rounded-2xl h-[27rem] min-w-0 p-5"><!-- Card 1 -->
-            <div class="flex justify-end">
-                <a href="" type="" class=""><i class="hgi hgi-stroke hgi-favourite text-lg"></i></a>
+        @* BANNER *@
+        <div class="relative overflow-hidden col-span-2 row-span-1 bg-gray-200 rounded-2xl h-[27rem] min-w-0">
+            <div class="absolute w-full h-full">
+                <img src="/img/category_banner.png" alt="" class="object-cover w-full h-full">
+                <div class="flex flex-col absolute bottom-24 left-4 px-4 py-2 z-10 w-25">
+                    <h1 class="text-white text-6xl font-bold">
+                        @Model.Category.Name
+                    </h1>
+                    <h1 class="text-white text-md font-bold break-words py-4">
+                        @Model.Category.Description
+                    </h1>
+                </div>
             </div>
-            <img src="/img/mice-cat.png" alt="" class="object-cover">
-            <h1>MX Master 3S</h1>
-            <div class="flex justify-between py-4 h-full">
-                <p class="text-sm text-[#5C5C5C]">$99.99</p>
-                <a href="" class="text-sm text-[#5C5C5C] flex items-center">
-                    <span class="mr-2">Add to cart</span>
-                    <i class="hgi hgi-stroke hgi-shopping-cart-01 text-lg"></i>
-                </a>
+            <div class="absolute z-10">
             </div>
         </div>
+        
+        @if (Model.Products != null && Model.Products.Any())
+        {
+            @foreach (var product in Model.Products)
+            {
+                <div class="relative col-span-1 row-span-1 bg-[#F2F2F2] rounded-2xl h-[27rem] min-w-0 p-5 flex flex-col justify-evenly">
+                    <!-- Heart Icon Link -->
+                    <a href="/favorite" class="absolute top-5 right-5 z-10">
+                        <i class="hgi hgi-stroke hgi-favourite text-xl font-bold"></i>
+                    </a>
+                    <!-- Main Card Link -->
+                    <a href="/shop/p/@product.Id" class="flex flex-col justify-evenly h-full">
+                        <img src="@product.MainImageUrl" alt="MX Master 3S" class="object-cover transition-transform duration-200 hover:-translate-y-5">
+                        <h1>@product.Name</h1>
+                        <div class="flex justify-between py-4 h-full">
+                            <p class="text-sm text-[#5C5C5C]">$@product.Price</p>
+                            <!-- Add to Cart Link -->
+                            <a href="/cart/add/mx-master-3s" class="text-sm text-[#5C5C5C] flex items-center">
+                                <span class="mr-2">Add to cart</span>
+                                <i class="hgi hgi-stroke hgi-shopping-cart-01 text-lg"></i>
+                            </a>
+                        </div>
+                    </a>
+                </div>
+            }
 
-        <div class="flex flex-col justify-evenly col-span-1 row-span-1 bg-gray-200 rounded-2xl h-[27rem] min-w-0 p-5"><!-- Card 1 -->
-            <div class="flex justify-end">
-                <a href="" type="" class=""><i class="hgi hgi-stroke hgi-favourite text-lg"></i></a>
-            </div>
-            <img src="/img/mice-cat.png" alt="" class="object-cover">
-            <h1>MX Master 3S</h1>
-            <div class="flex justify-between py-4 h-full">
-                <p class="text-sm text-[#5C5C5C]">$99.99</p>
-                <a href="" class="text-sm text-[#5C5C5C] flex items-center">
-                    <span class="mr-2">Add to cart</span>
-                    <i class="hgi hgi-stroke hgi-shopping-cart-01 text-lg"></i>
-                </a>
-            </div>
-        </div>
-        <div class="flex flex-col justify-evenly col-span-1 row-span-1 bg-gray-200 rounded-2xl h-[27rem] min-w-0 p-5"><!-- Card 1 -->
-            <div class="flex justify-end">
-                <a href="" type="" class=""><i class="hgi hgi-stroke hgi-favourite text-lg"></i></a>
-            </div>
-            <img src="/img/mice-cat.png" alt="" class="object-cover">
-            <h1>MX Master 3S</h1>
-            <div class="flex justify-between py-4 h-full">
-                <p class="text-sm text-[#5C5C5C]">$99.99</p>
-                <a href="" class="text-sm text-[#5C5C5C] flex items-center">
-                    <span class="mr-2">Add to cart</span>
-                    <i class="hgi hgi-stroke hgi-shopping-cart-01 text-lg"></i>
-                </a>
-            </div>
-        </div>
-        <div class="flex flex-col justify-evenly col-span-1 row-span-1 bg-gray-200 rounded-2xl h-[27rem] min-w-0 p-5"><!-- Card 1 -->
-            <div class="flex justify-end">
-                <a href="" type="" class=""><i class="hgi hgi-stroke hgi-favourite text-lg"></i></a>
-            </div>
-            <img src="/img/mice-cat.png" alt="" class="object-cover">
-            <h1>MX Master 3S</h1>
-            <div class="flex justify-between py-4 h-full">
-                <p class="text-sm text-[#5C5C5C]">$99.99</p>
-                <a href="" class="text-sm text-[#5C5C5C] flex items-center">
-                    <span class="mr-2">Add to cart</span>
-                    <i class="hgi hgi-stroke hgi-shopping-cart-01 text-lg"></i>
-                </a>
-            </div>
-        </div>
+        }
+        
+
+         
+
 
 
     </div>

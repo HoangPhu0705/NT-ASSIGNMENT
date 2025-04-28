@@ -80,6 +80,7 @@ namespace API.Controllers
        [HttpPost("~/connect/token"), Produces("application/json")]
         public async Task<IActionResult> Exchange()
         {
+            Console.WriteLine("Exchange token called");
             var request = HttpContext.GetOpenIddictServerRequest() ??
                           throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
             ClaimsPrincipal principal;
@@ -127,7 +128,6 @@ namespace API.Controllers
         {
             var request = HttpContext.GetOpenIddictServerRequest() ??
                           throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
-            
             var result = await HttpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
 
             if (!result.Succeeded)
@@ -146,7 +146,6 @@ namespace API.Controllers
 
             var principal = await CreateClaimsPrincipalAsync(user);
 
-            // Explicitly set the requested scopes
             var requestedScopes = request.GetScopes();
 
             principal.SetScopes(requestedScopes);
@@ -170,10 +169,10 @@ namespace API.Controllers
         [HttpGet("~/connect/userinfo")]
         public async Task<IActionResult> UserInfo()
         {
-            Console.WriteLine("Vo dc info nha");
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
+                Console.WriteLine("user null af vl");
                 return Challenge(
                     authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
                     properties: new AuthenticationProperties(new Dictionary<string, string?>

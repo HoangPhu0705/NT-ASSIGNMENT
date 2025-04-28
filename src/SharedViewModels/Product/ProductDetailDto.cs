@@ -20,5 +20,5 @@ public class ProductDetailDto
     public List<ProductVariantDto> Variants { get; set; } = new();
     public string? ImageUrl => Images?.FirstOrDefault(i => i.IsPrimary)?.ImageUrl;
     public decimal Price => Variants?.FirstOrDefault()?.Price ?? 0;
-    public int StockQuantity => Variants?.FirstOrDefault()?.StockQuantity ?? 0;
+    public int Stock => Variants?.FirstOrDefault()?.Stock ?? 0;
 }

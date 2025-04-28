@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
@@ -11,7 +14,6 @@ using Domain.Entities;
 using DotNetEnv;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace API
@@ -27,17 +29,15 @@ namespace API
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddAutoMapper(typeof(Program).Assembly, typeof(CategoryService).Assembly);
-            // Add Razor Pages support
             builder.Services.AddRazorPages();
 
             // Register Identity
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
-                {
-                    options.SignIn.RequireConfirmedAccount = true;
-                })
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-            
+            {
+                options.SignIn.RequireConfirmedAccount = true;
+            })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
 
             // Configure Identity 
             builder.Services.Configure<IdentityOptions>(options =>
@@ -48,30 +48,13 @@ namespace API
                 options.ClaimsIdentity.EmailClaimType = OpenIddictConstants.Claims.Email;
             });
 
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            })
-            .AddCookie(options =>
-            {
-                options.LoginPath = "/Account/Login"; 
-                options.Cookie.Name = "nextech_auth";
-                options.Cookie.HttpOnly = true;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.Cookie.SameSite = SameSiteMode.Strict;
-                options.ExpireTimeSpan = TimeSpan.FromHours(1);
-                options.SlidingExpiration = true;
-            });
-
             builder.Services.AddOpenIddict()
                 .AddCore(options =>
                 {
                     options.UseEntityFrameworkCore()
                            .UseDbContext<AppDbContext>();
-                }).AddServer(options =>
+                })
+                .AddServer(options =>
                 {
                     options.AllowAuthorizationCodeFlow()
                            .AllowRefreshTokenFlow();
@@ -79,20 +62,20 @@ namespace API
                            .SetAuthorizationEndpointUris("connect/authorize")
                            .SetUserInfoEndpointUris("connect/userinfo")
                            .SetEndSessionEndpointUris("connect/logout");
-                    
+
                     options.AddDevelopmentEncryptionCertificate()
                            .AddDevelopmentSigningCertificate();
                     options.RegisterScopes("openid", "email", "profile", "roles", "offline_access", "api");
-                    
+
                     options.AcceptAnonymousClients();
                     options.DisableAccessTokenEncryption();
-                    
+
                     options.UseAspNetCore()
                            .EnableTokenEndpointPassthrough()
                            .EnableAuthorizationEndpointPassthrough()
                            .EnableUserInfoEndpointPassthrough()
                            .EnableEndSessionEndpointPassthrough();
-                    
+
                     options.SetAccessTokenLifetime(TimeSpan.FromHours(1));
                     options.SetRefreshTokenLifetime(TimeSpan.FromDays(14));
                 })
@@ -103,15 +86,12 @@ namespace API
                 });
 
             // Register Services
-            //Repository
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IEmailSender, EmailSender>();
-            
-            //Seeders
             builder.Services.AddScoped<DbSeeder>();
             builder.Services.AddScoped<OpenIdSeeder>();
 
@@ -154,7 +134,7 @@ namespace API
 
             var app = builder.Build();
 
-            // Seed admin data
+            // Seed data
             using (var scope = app.Services.CreateScope())
             {
                 var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
@@ -169,13 +149,13 @@ namespace API
                 app.UseSwaggerUI();
             }
 
-            app.UseStaticFiles(); // Enable static files for CSS/JS
+            app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-            app.MapRazorPages(); // Add Razor Pages
+            app.MapRazorPages();
 
             app.Run();
         }

@@ -24,6 +24,18 @@ public class CategoryService : ICategoryService
         return ApiResponse<IEnumerable<CategoryDto>>.Success(categoriesDto);
     }
     
+    public async Task<ApiResponse<IEnumerable<CategoryAttributeDto>>> GetCategoryAttributesAsync(Guid categoryId)
+    {
+        var exists = await _categoryRepository.ExistsAsync(categoryId);
+        if (!exists)
+            return ApiResponse<IEnumerable<CategoryAttributeDto>>.Error("Category not found");
+
+        var attributes = await _categoryRepository.GetCategoryAttributesAsync(categoryId);
+        var filteredAttributes = attributes.Where(a => a.IsFilterable).ToList();
+        var attributesDto = _mapper.Map<IEnumerable<CategoryAttributeDto>>(filteredAttributes);
+        return ApiResponse<IEnumerable<CategoryAttributeDto>>.Success(attributesDto);
+    }
+    
     public async Task<ApiResponse<CategoryDetailDto>> GetCategoryByIdAsync(Guid id)
         {
             var category = await _categoryRepository.GetByIdAsync(id);
