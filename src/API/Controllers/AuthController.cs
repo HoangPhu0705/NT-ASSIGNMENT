@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore;
+﻿using System.Collections.Immutable;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +13,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Domain.Entities;
 using Application.Interfaces.Auth;
+using Microsoft.IdentityModel.Tokens;
 
 namespace API.Controllers
 {
@@ -77,33 +79,63 @@ namespace API.Controllers
             }
         }
 
-       [HttpPost("~/connect/token"), Produces("application/json")]
+       [HttpPost("~/connect/token"), IgnoreAntiforgeryToken, Produces("application/json")]
         public async Task<IActionResult> Exchange()
         {
-            Console.WriteLine("Exchange token called");
             var request = HttpContext.GetOpenIddictServerRequest() ??
-                          throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
-            ClaimsPrincipal principal;
+                throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
 
             if (request.IsAuthorizationCodeGrantType() || request.IsRefreshTokenGrantType())
             {
-                principal = (await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)).Principal;
-                var user = await _userManager.GetUserAsync(principal);
+                var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+
+                // Retrieve the user profile corresponding to the authorization code/refresh token.
+                var user = await _userManager.FindByIdAsync(result.Principal.GetClaim(OpenIddictConstants.Claims.Subject));
                 if (user is null)
-                    return ForbidWithError(OpenIddictConstants.Errors.ExpiredToken, "The token is no longer valid.");
+                {
+                    return Forbid(
+                        authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                        properties: new AuthenticationProperties(new Dictionary<string, string>
+                        {
+                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                            [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The token is no longer valid."
+                        }));
+                }
+
                 if (!await _signInManager.CanSignInAsync(user))
-                    return ForbidWithError(OpenIddictConstants.Errors.AccessDenied, "The user is no longer allowed to sign in.");
-                principal = await CreateClaimsPrincipalAsync(user);
-                var requestedScopes = request.GetScopes();
-                principal.SetScopes(requestedScopes);
+                {
+                    return Forbid(
+                        authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                        properties: new AuthenticationProperties(new Dictionary<string, string>
+                        {
+                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                            [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user is no longer allowed to sign in."
+                        }));
+                }
 
-            }
-            else
-            {
-                throw new InvalidOperationException("The specified grant type is not supported.");
+                var identity = new ClaimsIdentity(
+                    result.Principal.Claims,
+                    authenticationType: TokenValidationParameters.DefaultAuthenticationType,
+                    nameType: OpenIddictConstants.Claims.Name,
+                    roleType: OpenIddictConstants.Claims.Role);
+
+                identity.SetClaim(OpenIddictConstants.Claims.Subject, await _userManager.GetUserIdAsync(user))
+                        .SetClaim(OpenIddictConstants.Claims.Email, await _userManager.GetEmailAsync(user))
+                        .SetClaim(OpenIddictConstants.Claims.Name, await _userManager.GetUserNameAsync(user))
+                        .SetClaim(OpenIddictConstants.Claims.PreferredUsername, await _userManager.GetUserNameAsync(user))
+                        .SetClaim(OpenIddictConstants.Claims.GivenName, user.FirstName ?? string.Empty) // Add first_name
+                        .SetClaim(OpenIddictConstants.Claims.FamilyName, user.LastName ?? string.Empty) // Add last_name
+                        .SetClaims(OpenIddictConstants.Claims.Role, (await _userManager.GetRolesAsync(user)).ToImmutableArray());
+
+                // Set scopes and resources
+                identity.SetScopes(request.GetScopes());
+
+                identity.SetDestinations(GetDestinations);
+
+                return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             }
 
-            return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            throw new InvalidOperationException("The specified grant type is not supported.");
         }
 
         [HttpPost("~/api/auth/{provider}")]
@@ -166,19 +198,19 @@ namespace API.Controllers
                 });
         }
         
+        [Authorize(AuthenticationSchemes = OpenIddictServerAspNetCoreDefaults.AuthenticationScheme)]
         [HttpGet("~/connect/userinfo")]
         public async Task<IActionResult> UserInfo()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                Console.WriteLine("user null af vl");
                 return Challenge(
                     authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
                     properties: new AuthenticationProperties(new Dictionary<string, string?>
                     {
                         [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidToken,
-                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The specified access token is not valid."
+                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The specified access token is not valid while getting userinfo huhu."
                     }));
             }
     
@@ -196,7 +228,6 @@ namespace API.Controllers
             {
                 claims[OpenIddictConstants.Claims.Role] = roles.ToArray();
             }
-    
             return Ok(claims);
         }
 
@@ -227,6 +258,51 @@ namespace API.Controllers
                 [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = description
             });
             return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
+        
+        private static IEnumerable<string> GetDestinations(Claim claim)
+        {
+            switch (claim.Type)
+            {
+                case OpenIddictConstants.Claims.Subject:
+                    yield return OpenIddictConstants.Destinations.AccessToken;
+                    yield return OpenIddictConstants.Destinations.IdentityToken;
+                    yield break;
+
+                case OpenIddictConstants.Claims.Name:
+                case OpenIddictConstants.Claims.PreferredUsername:
+                    yield return OpenIddictConstants.Destinations.AccessToken;
+                    if (claim.Subject.HasScope(OpenIddictConstants.Permissions.Scopes.Profile))
+                        yield return OpenIddictConstants.Destinations.IdentityToken;
+                    yield break;
+
+                case OpenIddictConstants.Claims.Email:
+                    yield return OpenIddictConstants.Destinations.AccessToken;
+                    if (claim.Subject.HasScope(OpenIddictConstants.Permissions.Scopes.Email))
+                        yield return OpenIddictConstants.Destinations.IdentityToken;
+                    yield break;
+
+                case OpenIddictConstants.Claims.GivenName:
+                case OpenIddictConstants.Claims.FamilyName:
+                    yield return OpenIddictConstants.Destinations.AccessToken;
+                    if (claim.Subject.HasScope(OpenIddictConstants.Permissions.Scopes.Profile))
+                        yield return OpenIddictConstants.Destinations.IdentityToken;
+                    yield break;
+
+                case OpenIddictConstants.Claims.Role:
+                    yield return OpenIddictConstants.Destinations.AccessToken;
+                    if (claim.Subject.HasScope(OpenIddictConstants.Permissions.Scopes.Roles))
+                        yield return OpenIddictConstants.Destinations.IdentityToken;
+                    yield break;
+
+                // Never include sensitive claims like security stamps
+                case "AspNet.Identity.SecurityStamp":
+                    yield break;
+
+                default:
+                    yield return OpenIddictConstants.Destinations.AccessToken;
+                    yield break;
+            }
         }
     }
 }

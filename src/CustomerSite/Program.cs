@@ -78,27 +78,27 @@ namespace CustomerSite
                         return Task.CompletedTask;
                     },
                     OnTokenResponseReceived = context =>
-                    {
+                    {   
                         // Console.WriteLine("Access tokens: " + context.TokenEndpointResponse.AccessToken);
                         // Console.WriteLine("Refresh tokens: " + context.TokenEndpointResponse.RefreshToken);
                         return Task.CompletedTask;
                     },
                 };
 
-                // options.GetClaimsFromUserInfoEndpoint = true;
+                options.GetClaimsFromUserInfoEndpoint = true;
 
                 // // Map the claims from token to user identity
-                // options.ClaimActions.MapJsonKey("first_name", "first_name");
-                // options.ClaimActions.MapJsonKey("last_name", "last_name");
-                // options.ClaimActions.MapJsonKey("email", "email");
-                // options.ClaimActions.MapUniqueJsonKey("role", "role");
-                //
-                // // Set standard name and role claim types
-                // options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                // {
-                //     NameClaimType = "name",
-                //     RoleClaimType = "role"
-                // };
+                options.ClaimActions.MapJsonKey("first_name", "first_name");
+                options.ClaimActions.MapJsonKey("last_name", "last_name");
+                options.ClaimActions.MapJsonKey("email", "email");
+                options.ClaimActions.MapUniqueJsonKey("role", "role");
+                
+                // Set standard name and role claim types
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    NameClaimType = "name",
+                    RoleClaimType = "role"
+                };
 
             });
 

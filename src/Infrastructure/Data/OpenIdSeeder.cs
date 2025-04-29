@@ -45,9 +45,10 @@ public class OpenIdSeeder
             await manager.CreateAsync(new OpenIddictApplicationDescriptor
             {
                 ClientId = "admin-web-client",
+                ClientSecret = "admin-secret",
                 DisplayName = "Admin Portal",
-                RedirectUris = { new Uri("http://localhost:5173/signin-oidc") },
-                PostLogoutRedirectUris = { new Uri("http://localhost:5173/signout-callback-oidc") },
+                RedirectUris = { new Uri("https://localhost:5173/dashboard") },
+                PostLogoutRedirectUris = { new Uri("https://localhost:5173/signout-callback-oidc") },
                 Permissions =
                 {
                     OpenIddictConstants.Permissions.Endpoints.Authorization,

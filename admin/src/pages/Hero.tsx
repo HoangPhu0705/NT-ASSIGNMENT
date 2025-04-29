@@ -5,20 +5,19 @@ function Hero() {
   const auth = useAuth();
 
   const handleLogin = () => {
-    auth.signIn(); 
+    auth.signIn();
   };
 
   return (
     <div className="bg-gray-50 min-h-screen flex items-center justify-center">
       <div className="relative isolate px-6 pt-14 lg:px-8">
-        {/* Background gradient */}
         <div
           className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
           aria-hidden="true"
         >
           <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#93c5fd] to-[#3b82f6] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
         </div>
-
+    
         {/* Content */}
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56 text-center">
           <h1 className="text-balance text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
@@ -30,7 +29,7 @@ function Hero() {
           <div className="mt-10 flex items-center justify-center">
             <button
               onClick={handleLogin}
-              className="rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              className="rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600 hover:cursor-pointer"
             >
               Log In
             </button>

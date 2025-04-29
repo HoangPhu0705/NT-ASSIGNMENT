@@ -119,7 +119,7 @@ namespace API
                 options.AddPolicy("CorsPolicy", builder =>
                 {
                     builder.WithOrigins(
-                            "http://localhost:5173",
+                            "https://localhost:5173",
                             "https://localhost:7001",
                             "http://localhost:5178")
                            .AllowAnyMethod()

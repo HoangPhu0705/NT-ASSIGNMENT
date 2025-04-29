@@ -35,8 +35,8 @@ const items = [
     icon: ChartBarStacked,
   },
   {
-    title: "Users",
-    url: "/users",
+    title: "Customers",
+    url: "/customers",
     icon: Users,
   },
   {

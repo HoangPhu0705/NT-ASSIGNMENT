@@ -4,7 +4,7 @@ const Dashboard: React.FC = () => {
   const handleLogout = () => {
     const params = new URLSearchParams({
       id_token_hint: localStorage.getItem("id_token") || "",
-      post_logout_redirect_uri: "http://localhost:5173/logout-callback",
+      post_logout_redirect_uri: "https://localhost:5173/signout-callback-oidc",
     });
 
     localStorage.removeItem("access_token");
@@ -26,7 +26,7 @@ const Dashboard: React.FC = () => {
       >
         Log Out
       </button>
-    </div>  
+    </div>
   );
 };
 
