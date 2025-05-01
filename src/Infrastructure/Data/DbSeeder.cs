@@ -44,7 +44,7 @@ public class DbSeeder
                 CreatedAt = DateTime.UtcNow,
                 EmailConfirmed = true
             };
-            var result = await _userManager.CreateAsync(adminUser, "Abc123!");
+            var result = await _userManager.CreateAsync(adminUser, "123Abc!");
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(adminUser, "Admin");

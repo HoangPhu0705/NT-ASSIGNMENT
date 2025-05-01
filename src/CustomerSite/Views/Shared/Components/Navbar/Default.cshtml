@@ -1,3 +1,6 @@
+@model System.Security.Claims.ClaimsPrincipal
+
+
 <div class="navbar bg-base-100 px-36 border-b-4 border-base-200 py-0 min-h-[60px]">
     
     <div class="flex-1">
@@ -60,8 +63,17 @@
                         <li><a href="/auth/create-account" class="btn mt-4 rounded-full bg-black text-white font-bold hover:bg-white hover:text-black">CREATE AN ACCOUNT</a></li>
                     }else 
                     {
-                        <li><a href="/auth/profile" class="btn mt-4 rounded-full bg-[#4CF6CF] font-bold">PROFILE</a></li>
-                        <li><a href="/auth/logout" class="btn mt-4 rounded-full bg-black text-white font-bold hover:bg-white hover:text-black">LOGOUT</a></li>
+                        <span class="text-lg font-bold mb-5">
+                            HI <span class="uppercase">@User.Identity.Name</span>
+                            <p class="text-sm font-medium text-gray-500">@Model.FindFirst("email")?.Value</p>
+                        </span>
+                        <a href="/auth/profile" class="font-medium px-0 hover:bg-transparent hover:underline py-3 ">PROFILE</a>
+                        <a href="/auth/profile" class="font-medium px-0 hover:bg-transparent hover:underline py-3 ">ACCOUNT SETTINGS</a>
+                        <div class="divider"></div>
+                        <a href="/auth/logout" class="group font-medium px-0 hover:bg-transparent hover:underline">
+                            LOGOUT
+                            <span class="w-10 h-2 bg-[#4CF6CF] inline-block rounded-xl ml-2 transition-all duration-200 group-hover:w-5"></span>
+                        </a>
                     }
                    
 

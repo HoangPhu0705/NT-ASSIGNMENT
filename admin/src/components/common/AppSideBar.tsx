@@ -1,6 +1,6 @@
 import {
   ShoppingCart,
-  Home,
+  LayoutDashboardIcon,
   ChartBarStacked,
   Users,
   Settings,
@@ -20,9 +20,9 @@ import {
 // Menu items.
 const items = [
   {
-    title: "Home",
-    url: "/",
-    icon: Home,
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboardIcon,
   },
   {
     title: "Product",

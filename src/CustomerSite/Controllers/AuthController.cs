@@ -28,10 +28,11 @@ namespace CustomerSite.Controllers
             ViewData["Title"] = "Sign In";
             return Challenge(new AuthenticationProperties
             {
-                RedirectUri = "/",
+                RedirectUri = returnUrl,
             }, 
             OpenIdConnectDefaults.AuthenticationScheme);
         }
+        
         
         [HttpGet]
         [Route("create-account")]
@@ -60,10 +61,6 @@ namespace CustomerSite.Controllers
         [Route("profile")]
         public IActionResult Profile()
         {
-            foreach (var claim in User.Claims)
-            {
-                Console.WriteLine($"Claim Type: {claim.Type}, Value: {claim.Value}");
-            }
             return View(User.Claims);
         }
 

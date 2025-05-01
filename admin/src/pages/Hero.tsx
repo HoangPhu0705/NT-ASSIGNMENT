@@ -1,8 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "oidc-react";
 
 function Hero() {
   const auth = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (!auth.isLoading && auth.userData) {
+        const roles = auth.userData.profile.role;
+        const isAdmin = Array.isArray(roles)
+          ? roles.includes("Admin")
+          : roles === "Admin";
+        if (isAdmin) {
+          console.info("Navigating to /dashboard for authenticated admin");
+          // Replace history to prevent back navigation to /
+          window.history.replaceState(null, "", "/dashboard");
+          navigate("/dashboard", { replace: true });
+        }
+      }
+    };
+
+    checkAuth();
+  }, [auth.isLoading, auth.userData, navigate]);
 
   const handleLogin = () => {
     auth.signIn();
@@ -17,7 +38,7 @@ function Hero() {
         >
           <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#93c5fd] to-[#3b82f6] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
         </div>
-    
+
         {/* Content */}
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56 text-center">
           <h1 className="text-balance text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">

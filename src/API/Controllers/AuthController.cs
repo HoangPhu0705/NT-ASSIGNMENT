@@ -84,7 +84,8 @@ namespace API.Controllers
         {
             var request = HttpContext.GetOpenIddictServerRequest() ??
                 throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
-
+            
+            Console.WriteLine($"[EXCHANGE TOKEN] : {request.ClientId} need token");
             if (request.IsAuthorizationCodeGrantType() || request.IsRefreshTokenGrantType())
             {
                 var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
@@ -155,22 +156,34 @@ namespace API.Controllers
 
         [HttpGet("~/connect/authorize")]
         [HttpPost("~/connect/authorize")]
-        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Authorize()
         {
             var request = HttpContext.GetOpenIddictServerRequest() ??
                           throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
-            var result = await HttpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
+            var clientId = request.ClientId;
+            Console.WriteLine($"[AUTHORIZE] : {clientId} needs authorization");
+
+            var scheme = clientId switch
+            {
+                "admin-web-client" => "AdminScheme",
+                "customer-web-client" => "CustomerScheme",
+                _ => IdentityConstants.ApplicationScheme,
+            };
+            Console.WriteLine($"[AUTHORIZE] Using scheme: {scheme}");
+
+            var result = await HttpContext.AuthenticateAsync(scheme);
+            Console.WriteLine($"[AUTHORIZE] Authentication result: Succeeded={result?.Succeeded}, Principal={result?.Principal?.Identity?.Name}");
 
             if (!result.Succeeded)
             {
+                var redirectUri = Request.PathBase + Request.Path + QueryString.Create(
+                    Request.HasFormContentType ? Request.Form.ToList() : Request.Query.ToList());
+                Console.WriteLine($"[AUTHORIZE] User not authenticated :((, challenging with scheme {scheme}, RedirectUri={redirectUri}");
                 return Challenge(
-                    authenticationSchemes: IdentityConstants.ApplicationScheme,
                     properties: new AuthenticationProperties
                     {
-                        RedirectUri = Request.PathBase + Request.Path + QueryString.Create(
-                            Request.HasFormContentType ? Request.Form.ToList() : Request.Query.ToList())
-                    });
+                        RedirectUri = redirectUri
+                    }, [scheme]);
             }
 
             var user = await _userManager.GetUserAsync(result.Principal) ??
@@ -179,15 +192,57 @@ namespace API.Controllers
             var principal = await CreateClaimsPrincipalAsync(user);
 
             var requestedScopes = request.GetScopes();
-
             principal.SetScopes(requestedScopes);
 
+            Console.WriteLine($"[AUTHORIZE] Signing in user {user.Id}");
             return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
         [HttpGet("~/connect/logout")]
         public async Task<IActionResult> Logout()
         {
+            // Get the OpenID Connect request
+            var request = HttpContext.GetOpenIddictServerRequest();
+            
+            if (request != null && !string.IsNullOrEmpty(request.ClientId))
+            {
+                var scheme = request.ClientId switch
+                {
+                    "admin-web-client" => "AdminScheme",
+                    "customer-web-client" => "CustomerScheme",
+                    _ => null
+                };
+
+                Console.WriteLine($"[LOGOUT] Client {request.ClientId} logging out, using scheme: {scheme}");
+                
+                if (!string.IsNullOrEmpty(scheme))
+                {
+                    await HttpContext.SignOutAsync(scheme);
+                }
+            }
+            else
+            {
+                // If client ID cannot be determined, check which scheme the user is authenticated with
+                var isCustomerAuthenticated = HttpContext.User.Identity?.AuthenticationType == "CustomerScheme" 
+                    || await HttpContext.AuthenticateAsync("CustomerScheme") is { Succeeded: true };
+                    
+                var isAdminAuthenticated = HttpContext.User.Identity?.AuthenticationType == "AdminScheme"
+                    || await HttpContext.AuthenticateAsync("AdminScheme") is { Succeeded: true };
+
+                if (isCustomerAuthenticated)
+                {
+                    Console.WriteLine("[LOGOUT] Customer user detected, signing out from CustomerScheme");
+                    await HttpContext.SignOutAsync("CustomerScheme");
+                }
+                
+                if (isAdminAuthenticated)
+                {
+                    Console.WriteLine("[LOGOUT] Admin user detected, signing out from AdminScheme");
+                    await HttpContext.SignOutAsync("AdminScheme");
+                }
+            }
+
+            // Always perform the standard sign out
             await _signInManager.SignOutAsync();
 
             return SignOut(

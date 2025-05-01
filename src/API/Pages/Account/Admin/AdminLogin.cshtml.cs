@@ -6,7 +6,7 @@ using Domain.Entities;
 using SharedViewModels.Auth;
 using System.Threading.Tasks;
 
-namespace API.Pages.Account
+namespace API.Pages.Account.Admin
 {
     public class LoginModel : PageModel
     {
@@ -34,30 +34,33 @@ namespace API.Pages.Account
 
         public async Task<IActionResult> OnPostAsync()
         {
-            Console.WriteLine("post vo ne");
+            Console.WriteLine("Admin login started");
             if (!ModelState.IsValid)
             {
                 ViewData["Error"] = "Please correct the errors in the form.";
                 return Page();
             }
-            
+
             var user = await _userManager.FindByEmailAsync(Input.Email);
             if (user == null)
             {
                 ViewData["Error"] = "Invalid email or password.";
                 return Page();
             }
-            
-            var result = await _signInManager.PasswordSignInAsync(user, Input.Password, isPersistent: false, lockoutOnFailure: false);
-            if (result.Succeeded)
+
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, Input.Password);
+            if (isPasswordValid)
             {
                 if (!await _signInManager.CanSignInAsync(user))
                 {
                     ViewData["Error"] = "This account is not allowed to sign in.";
-                    await _signInManager.SignOutAsync();
                     return Page();
                 }
-            
+
+                var principal = await _signInManager.CreateUserPrincipalAsync(user);
+                await HttpContext.SignInAsync("AdminScheme", principal);
+
+                Console.WriteLine("admin login success");
                 return LocalRedirect(Input.ReturnUrl ?? "/");
             }
 

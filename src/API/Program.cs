@@ -27,7 +27,8 @@ namespace API
 
             // Register DBContext
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+            );
             builder.Services.AddAutoMapper(typeof(Program).Assembly, typeof(CategoryService).Assembly);
             builder.Services.AddRazorPages();
 
@@ -35,9 +36,7 @@ namespace API
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = true;
-            })
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
+            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 
             // Configure Identity 
             builder.Services.Configure<IdentityOptions>(options =>
@@ -47,6 +46,23 @@ namespace API
                 options.ClaimsIdentity.RoleClaimType = OpenIddictConstants.Claims.Role;
                 options.ClaimsIdentity.EmailClaimType = OpenIddictConstants.Claims.Email;
             });
+            
+            //Different customer and admin scheme
+            builder.Services.AddAuthentication()
+                .AddCookie("AdminScheme",options =>
+                {
+                  options.Cookie.Name = ".AspNetCore.Identity.Admin";  
+                  options.LoginPath = "/Account/Admin/AdminLogin";
+                  options.ExpireTimeSpan = TimeSpan.FromDays(7);
+                  options.SlidingExpiration = true;
+                })
+                .AddCookie("CustomerScheme",options =>
+                {
+                    options.Cookie.Name = ".AspNetCore.Identity.Customer";  
+                    options.LoginPath = "/Account/Customer/CustomerLogin";
+                    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+                    options.SlidingExpiration = true;
+                });
 
             builder.Services.AddOpenIddict()
                 .AddCore(options =>
@@ -94,15 +110,7 @@ namespace API
             builder.Services.AddScoped<IEmailSender, EmailSender>();
             builder.Services.AddScoped<DbSeeder>();
             builder.Services.AddScoped<OpenIdSeeder>();
-
-            // Configure OAuth providers
-            builder.Services.AddAuthentication()
-                .AddGoogle(options =>
-                {
-                    options.ClientId = builder.Configuration["GOOGLE_CLIENT_ID"];
-                    options.ClientSecret = builder.Configuration["GOOGLE_CLIENT_SECRET"];
-                    options.SaveTokens = true;
-                });
+            
 
             // Authorization policies
             builder.Services.AddAuthorization(options =>
@@ -118,10 +126,7 @@ namespace API
             {
                 options.AddPolicy("CorsPolicy", builder =>
                 {
-                    builder.WithOrigins(
-                            "https://localhost:5173",
-                            "https://localhost:7001",
-                            "http://localhost:5178")
+                    builder.WithOrigins("https://localhost:5173", "https://localhost:7001","http://localhost:5178")
                            .AllowAnyMethod()
                            .AllowAnyHeader()
                            .AllowCredentials();
@@ -152,8 +157,10 @@ namespace API
             app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseCors("CorsPolicy");
+            
             app.UseAuthentication();
             app.UseAuthorization();
+            
             app.MapControllers();
             app.MapRazorPages();
 

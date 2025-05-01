@@ -8,13 +8,18 @@ const ProtectedRoute: React.FC = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      console.info("Auth isLoading:", auth.isLoading);
+      console.info("User data:", auth.userData);
       if (!auth.isLoading && auth.userData) {
+        console.info("User profile:", auth.userData.profile);
         const roles = auth.userData.profile.role;
         const isAdmin = Array.isArray(roles)
           ? roles.includes("Admin")
           : roles === "Admin";
+        console.info("Is admin:", isAdmin);
         setIsAuthenticated(isAdmin);
-      } else {
+      } else if (!auth.isLoading) {
+        console.info("No user data or still loading");
         setIsAuthenticated(false);
       }
     };
@@ -30,6 +35,7 @@ const ProtectedRoute: React.FC = () => {
     );
   }
 
+  console.info("authen final" + isAuthenticated);
   return isAuthenticated ? <Outlet /> : <Navigate to="/" replace />;
 };
 
