@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace API.Controllers;
 
-
 [Route("api/category")]
 [ApiController]
 public class CategoryController : ControllerBase
@@ -46,7 +45,6 @@ public class CategoryController : ControllerBase
             return BadRequest(ApiResponse<string>.Error(ex.Message));
         }
     }
-    
     
     [HttpGet("root")]
     public async Task<ActionResult<ApiResponse<IEnumerable<CategoryDto>>>> GetRootCategories()
@@ -89,51 +87,5 @@ public class CategoryController : ControllerBase
             return BadRequest(ApiResponse<string>.Error(ex.Message));
         }
     }
-    
-    [HttpPost]
-    public async Task<ActionResult<ApiResponse<CategoryDetailDto>>> CreateCategory([FromBody] CreateCategoryRequest request)
-    {
-        try
-        {
-            var response = await _categoryService.CreateCategoryAsync(request);
-            return CreatedAtAction(nameof(GetCategoryById), new { id = response.Data.Id }, response);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<string>.Error(ex.Message));
-        }
-    }
-    
-    [HttpPatch("{id}")]
-    public async Task<ActionResult<ApiResponse<CategoryDetailDto>>> UpdateCategory(Guid id, [FromBody] UpdateCategoryRequest request)
-    {
-        try
-        {
-            var response = await _categoryService.UpdateCategoryAsync(id, request);
-            return Ok(response);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<string>.Error(ex.Message));
-        }
-    }
-    
-    
-    [HttpDelete("{id}")]
-    public async Task<ActionResult<ApiResponse<bool>>> DeleteCategory(Guid id)
-    {
-        try
-        {
-            var response = await _categoryService.DeleteCategoryAsync(id);
-            return Ok(response);
-            
-        }catch (Exception ex)
-        {
-            return BadRequest(ApiResponse<string>.Error(ex.Message));
-        }
-    }
-    
-    
-    
     
 }

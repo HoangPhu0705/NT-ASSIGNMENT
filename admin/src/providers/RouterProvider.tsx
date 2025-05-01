@@ -115,7 +115,7 @@ const router = createBrowserRouter([
         errorElement: <ErrorPage />,
       },
       {
-        path: "/users",
+        path: "/customers",
         element: <Layout children={<Customer />} />,
         errorElement: <ErrorPage />,
       },

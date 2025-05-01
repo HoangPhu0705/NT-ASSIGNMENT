@@ -1,5 +1,3 @@
-// src/pages/admin/ProductPage.tsx
-
 import React, { useState } from "react";
 import {
   Button,
@@ -11,13 +9,17 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   Input,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Table,
   TableBody,
   TableCell,
@@ -26,7 +28,7 @@ import {
   TableRow,
   Textarea,
 } from "@/components/ui";
-import { MoreVertical, Pencil, Trash } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 
 interface Variant {
   id: number;
@@ -44,98 +46,38 @@ interface Product {
   variants: Variant[];
 }
 
-let productIdCounter = 3;
-let variantIdCounter = 1;
-
 function ProductPage() {
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: 1,
-      name: "Wireless Mouse",
-      category: "Mice",
-      description: "A nice wireless mouse",
-      variants: [],
-    },
-    {
-      id: 2,
-      name: "Mechanical Keyboard",
-      category: "Keyboards",
-      description: "Tactile mechanical keyboard",
-      variants: [],
-    },
-  ]);
-
+  // UI-only states
   const [openProductDialog, setOpenProductDialog] = useState(false);
+  const [openVariantDialog, setOpenVariantDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
 
   const [newProductName, setNewProductName] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
   const [newProductCategory, setNewProductCategory] = useState("");
   const [newProductDescription, setNewProductDescription] = useState("");
   const [variants, setVariants] = useState<Variant[]>([]);
-
-  const [openVariantDialog, setOpenVariantDialog] = useState(false);
-  const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
 
   const [variantName, setVariantName] = useState("");
   const [variantSku, setVariantSku] = useState("");
   const [variantPrice, setVariantPrice] = useState("");
   const [variantStock, setVariantStock] = useState("");
 
-  const resetProductForm = () => {
+  // Filters
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [sortOption, setSortOption] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  const handleAddProduct = () => {
+    setEditingProduct(null);
     setNewProductName("");
     setNewProductCategory("");
     setNewProductDescription("");
     setVariants([]);
-  };
-
-  const openAddProduct = () => {
-    resetProductForm();
-    setEditingProduct(null);
     setOpenProductDialog(true);
   };
 
-  const handleEdit = (product: Product) => {
-    setSelectedProduct(product);
-    setOpenProductDialog(true);
-  };
-
-  const handleDelete = (productId: number) => {
-    console.log("Delete product with id:", productId);
-  };
-
-  const saveProduct = () => {
-    if (!editingProduct) {
-      setProducts((prev) => [
-        ...prev,
-        {
-          id: productIdCounter++,
-          name: newProductName,
-          category: newProductCategory,
-          description: newProductDescription,
-          variants: variants,
-        },
-      ]);
-    } else {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === editingProduct.id
-            ? {
-                ...p,
-                name: newProductName,
-                category: newProductCategory,
-                description: newProductDescription,
-                variants,
-              }
-            : p
-        )
-      );
-    }
-    setOpenProductDialog(false);
-  };
-
-  const startEditProduct = (product: Product) => {
+  const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setNewProductName(product.name);
     setNewProductCategory(product.category);
@@ -164,13 +106,12 @@ function ProductPage() {
 
   const saveVariant = () => {
     if (!variantName || !variantSku || !variantPrice || !variantStock) return;
-
     if (editingVariant) {
       setVariants((prev) =>
         prev.map((v) =>
           v.id === editingVariant.id
             ? {
-                id: v.id,
+                ...v,
                 name: variantName,
                 sku: variantSku,
                 price: parseFloat(variantPrice),
@@ -180,10 +121,11 @@ function ProductPage() {
         )
       );
     } else {
+      const newId = Date.now();
       setVariants((prev) => [
         ...prev,
         {
-          id: variantIdCounter++,
+          id: newId,
           name: variantName,
           sku: variantSku,
           price: parseFloat(variantPrice),
@@ -198,64 +140,54 @@ function ProductPage() {
     setVariants((prev) => prev.filter((v) => v.id !== id));
   };
 
-  const deleteProduct = (id: number) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-  };
-
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-2xl font-bold">Products</h1>
-        <Button onClick={openAddProduct}>Add Product</Button>
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <Input
+            placeholder="Search products..."
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+          />
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Filter Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="mice">Mice</SelectItem>
+              <SelectItem value="keyboards">Keyboards</SelectItem>
+              <SelectItem value="headsets">Headsets</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortOption} onValueChange={setSortOption}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Sort By" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name-asc">Name A-Z</SelectItem>
+              <SelectItem value="name-desc">Name Z-A</SelectItem>
+              <SelectItem value="date-newest">Newest</SelectItem>
+              <SelectItem value="date-oldest">Oldest</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={handleAddProduct}>Add Product</Button>
+        </div>
       </div>
 
+      {/* Placeholder for Product Table (waiting for API connection) */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Product List</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>{product.description}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEdit(product)}>
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDelete(product.id)}
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="text-sm text-muted-foreground text-center py-8">
+            Products will be listed here after API integration.
+          </div>
         </CardContent>
       </Card>
 
-      {/* Product Dialog */}
+      {/* Add/Edit Product Dialog */}
       <Dialog open={openProductDialog} onOpenChange={setOpenProductDialog}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -270,7 +202,6 @@ function ProductPage() {
                 <Input
                   value={newProductName}
                   onChange={(e) => setNewProductName(e.target.value)}
-                  placeholder="Product Name"
                 />
               </div>
               <div>
@@ -278,7 +209,6 @@ function ProductPage() {
                 <Input
                   value={newProductCategory}
                   onChange={(e) => setNewProductCategory(e.target.value)}
-                  placeholder="Category"
                 />
               </div>
             </div>
@@ -287,11 +217,9 @@ function ProductPage() {
               <Textarea
                 value={newProductDescription}
                 onChange={(e) => setNewProductDescription(e.target.value)}
-                placeholder="Description"
               />
             </div>
 
-            {/* Variant Management */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Label>Variants</Label>
@@ -347,7 +275,7 @@ function ProductPage() {
             <Button
               className="w-full"
               disabled={variants.length === 0}
-              onClick={saveProduct}
+              onClick={() => setOpenProductDialog(false)}
             >
               Save Product
             </Button>

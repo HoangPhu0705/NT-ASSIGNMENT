@@ -32,4 +32,8 @@
     <ProjectReference Include="..\SharedViewModels\SharedViewModels.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Admin\" />
+  </ItemGroup>
+
 </Project>
