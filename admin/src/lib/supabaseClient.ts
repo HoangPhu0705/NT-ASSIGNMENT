@@ -41,8 +41,9 @@ export const uploadCategoryImage = async (file: File): Promise<string> => {
       throw new Error("Failed to retrieve public URL");
     }
 
-    console.log("Public URL generated:", data.publicUrl);
-    return data.publicUrl;
+    const cacheBustedUrl = `${data.publicUrl}?t=${Date.now()}`;
+    console.log("Public URL generated:", cacheBustedUrl);
+    return cacheBustedUrl;
   } catch (err: any) {
     console.error("UploadCategoryImage error:", err);
     throw new Error(`Image upload failed: ${err.message}`);
@@ -82,8 +83,9 @@ export const updateCategoryImage = async (
       throw new Error("Failed to retrieve public URL");
     }
 
-    console.log("Updated public URL:", data.publicUrl);
-    return data.publicUrl;
+    const cacheBustedUrl = `${data.publicUrl}?t=${Date.now()}`;
+    console.log("Updated public URL:", cacheBustedUrl);
+    return cacheBustedUrl;
   } catch (err: any) {
     console.error("UpdateCategoryImage error:", err);
     throw new Error(`Image update failed: ${err.message}`);

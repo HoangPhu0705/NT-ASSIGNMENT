@@ -52,7 +52,6 @@ const useAxios = (): UseAxiosReturn => {
 
       const { access_token, refresh_token, expires_at, scope } = response.data;
 
-      // Create a new User object for oidc-client-ts
       const user = new User({
         access_token,
         refresh_token,
@@ -76,7 +75,6 @@ const useAxios = (): UseAxiosReturn => {
     }
   }, [auth]);
 
-  // Add request and response interceptors
   useEffect(() => {
     const requestInterceptor = axiosInstance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
@@ -108,7 +106,6 @@ const useAxios = (): UseAxiosReturn => {
       }
     );
 
-    // Cleanup interceptors on unmount
     return () => {
       axiosInstance.interceptors.request.eject(requestInterceptor);
       axiosInstance.interceptors.response.eject(responseInterceptor);

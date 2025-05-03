@@ -10,7 +10,6 @@ const ProtectedRoute: React.FC = () => {
     const checkAuth = async () => {
       console.info("User data:", auth.userData);
       if (!auth.isLoading && auth.userData) {
-        console.info("User profile:", auth.userData.profile);
         const roles = auth.userData.profile.role;
         const isAdmin = Array.isArray(roles)
           ? roles.includes("Admin")
@@ -33,7 +32,6 @@ const ProtectedRoute: React.FC = () => {
     );
   }
 
-  console.info("authen final" + isAuthenticated);
   return isAuthenticated ? <Outlet /> : <Navigate to="/" replace />;
 };
 

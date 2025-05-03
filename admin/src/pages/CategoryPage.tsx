@@ -1,26 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  Input,
-  Label,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui";
-import { Pencil, Trash } from "lucide-react";
+import { Button } from "@/components/ui";
 import useAxios from "@/hooks/useAxios";
-import { uploadCategoryImage } from "@/lib/supabaseClient"; // Adjust the import path as necessary
+import {
+  uploadCategoryImage,
+  updateCategoryImage,
+  deleteCategoryImage,
+} from "@/lib/supabaseClient";
+import CategoryDialog from "@/components/dialog/category-dialog";
+import CategoryTable from "@/components/common/category-table";
+import ConfirmDialog from "@/components/dialog/confirm-dialog";
 
 interface Category {
   id: string;
@@ -46,13 +35,9 @@ function CategoryPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [categoryName, setCategoryName] = useState("");
-  const [categoryDescription, setCategoryDescription] = useState("");
-  const [categoryImage, setCategoryImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // Fetch categories on mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -74,51 +59,30 @@ function CategoryPage() {
     fetchCategories();
   }, [axiosInstance]);
 
-  // Handle image selection and preview
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setCategoryImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setCategoryImage(null);
-      setImagePreview(null);
-    }
-  };
-
   const handleOpenAdd = () => {
     setEditingCategory(null);
-    setCategoryName("");
-    setCategoryDescription("");
-    setCategoryImage(null);
-    setImagePreview(null);
-    setApiError(null);
     setOpenDialog(true);
   };
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
-    setCategoryName(category.name);
-    setCategoryDescription(category.description);
-    setCategoryImage(null);
-    setImagePreview(category.imageUrl || null);
-    setApiError(null);
     setOpenDialog(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this category?"))
-      return;
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
     try {
+      const category = categories.find((c) => c.id === confirmDelete);
+      if (category?.imageUrl) {
+        const filePath = category.imageUrl.split("/").slice(-2).join("/");
+        await deleteCategoryImage(filePath);
+      }
+
       const response = await axiosInstance.delete<ApiResponse<boolean>>(
-        `/api/admin/category/${id}`
+        `/api/admin/category/${confirmDelete}`
       );
       if (response.data.succeeded) {
-        setCategories(categories.filter((category) => category.id !== id));
+        setCategories(categories.filter((c) => c.id !== confirmDelete));
       } else {
         setApiError(
           response.data.errors?.join(", ") || "Failed to delete category"
@@ -126,47 +90,54 @@ function CategoryPage() {
       }
     } catch (err: any) {
       setApiError(err.message || "Error deleting category");
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
-  const handleSave = async () => {
-    if (!categoryName.trim()) {
-      setApiError("Category name is required");
-      return;
-    }
-
+  const handleSave = async (data: {
+    name: string;
+    description: string;
+    image: File | null;
+  }) => {
     try {
       let imageUrl = editingCategory?.imageUrl || "";
-      if (categoryImage) {
-        imageUrl = await uploadCategoryImage(categoryImage);
+      if (data.image) {
+        if (editingCategory && editingCategory.imageUrl) {
+          const filePath = editingCategory.imageUrl
+            .split("/")
+            .slice(-2)
+            .join("/");
+          console.log("File path:", filePath);
+          imageUrl = await updateCategoryImage(data.image, filePath);
+        } else {
+          imageUrl = await uploadCategoryImage(data.image);
+        }
       }
 
       const request: CategoryRequest = {
-        name: categoryName,
-        description: categoryDescription,
+        name: data.name,
+        description: data.description,
         imageUrl,
       };
 
       if (editingCategory) {
-        // Update category
         const response = await axiosInstance.patch<ApiResponse<Category>>(
           `/api/admin/category/${editingCategory.id}`,
           request
         );
         if (response.data.succeeded) {
           setCategories(
-            categories.map((category) =>
-              category.id === editingCategory.id ? response.data.data : category
+            categories.map((c) =>
+              c.id === editingCategory.id ? response.data.data : c
             )
           );
         } else {
-          setApiError(
+          throw new Error(
             response.data.errors?.join(", ") || "Failed to update category"
           );
-          return;
         }
       } else {
-        // Create category
         const response = await axiosInstance.post<ApiResponse<Category>>(
           "/api/admin/category",
           request
@@ -174,17 +145,13 @@ function CategoryPage() {
         if (response.data.succeeded) {
           setCategories([...categories, response.data.data]);
         } else {
-          setApiError(
+          throw new Error(
             response.data.errors?.join(", ") || "Failed to create category"
           );
-          return;
         }
       }
-      setOpenDialog(false);
-      setCategoryImage(null);
-      setImagePreview(null);
     } catch (err: any) {
-      setApiError(err.message || "Error saving category");
+      throw new Error(err.message || "Error saving category");
     }
   };
 
@@ -203,121 +170,29 @@ function CategoryPage() {
         </div>
       )}
 
-      {isLoading && !categories.length ? (
-        <div className="text-center">Loading...</div>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Category List</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Image</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {categories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell>
-                      {category.imageUrl ? (
-                        <img
-                          src={category.imageUrl}
-                          alt={category.name}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      ) : (
-                        "No image"
-                      )}
-                    </TableCell>
-                    <TableCell>{category.name}</TableCell>
-                    <TableCell>{category.description}</TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleEdit(category)}
-                        disabled={isLoading}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleDelete(category.id)}
-                        disabled={isLoading}
-                      >
-                        <Trash className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+      <CategoryTable
+        categories={categories}
+        isLoading={isLoading}
+        onEdit={handleEdit}
+        onDelete={(id) => setConfirmDelete(id)}
+      />
 
-      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingCategory ? "Edit Category" : "Add Category"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Name</Label>
-              <Input
-                value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
-                placeholder="Category Name"
-                disabled={isLoading}
-              />
-            </div>
-            <div>
-              <Label>Description</Label>
-              <Input
-                value={categoryDescription}
-                onChange={(e) => setCategoryDescription(e.target.value)}
-                placeholder="Category Description"
-                disabled={isLoading}
-              />
-            </div>
-            <div>
-              <Label>Image</Label>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                disabled={isLoading}
-              />
-              {imagePreview && (
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="mt-2 w-32 h-32 object-cover rounded"
-                />
-              )}
-            </div>
-            <Button
-              className="w-full"
-              onClick={handleSave}
-              disabled={isLoading}
-            >
-              {isLoading
-                ? "Saving..."
-                : editingCategory
-                ? "Save Changes"
-                : "Add Category"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <CategoryDialog
+        open={openDialog}
+        onOpenChange={setOpenDialog}
+        category={editingCategory}
+        onSave={handleSave}
+        isLoading={isLoading}
+      />
+
+      <ConfirmDialog
+        open={!!confirmDelete}
+        onOpenChange={() => setConfirmDelete(null)}
+        onConfirm={handleDelete}
+        title="Delete Category"
+        description="Are you sure you want to delete this category? This action cannot be undone."
+        isLoading={isLoading}
+      />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import {
   RouterProvider as ReactRouterProvider,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "oidc-react";
-import ErrorPage from "../components/common/ErrorPage";
+import ErrorPage from "../pages/ErrorPage";
 import Layout from "../components/layout/Layout";
 import ProductPage from "../pages/ProductPage";
 import Dashboard from "../pages/Dashboard";
@@ -33,8 +33,8 @@ const SignInCallback = () => {
   }, [auth]);
 
   return (
-    <div className="w-full h-full flex justify-center items-center">
-      <Spinner />
+    <div className="w-full h-screen flex justify-center items-center">
+      <Spinner className="w-2xl h-2xl" />
     </div>
   );
 };
@@ -60,8 +60,8 @@ const SignOutCallback = () => {
   }, [auth]);
 
   return (
-    <div className="w-full h-full flex justify-center items-center">
-      <Spinner />
+    <div className="w-full h-screen flex justify-center items-center">
+      <Spinner className="w-2xl h-2xl" />
     </div>
   );
 };
@@ -73,8 +73,7 @@ const oidcConfig = {
   postLogoutRedirectUri: "https://localhost:5173/signout-callback-oidc",
   responseType: "code",
   scope: "openid email profile roles offline_access api",
-  onSignIn: async (user) => {
-    console.log("Sign-in successful, user:", user);
+  onSignIn: async () => {
     window.history.replaceState(null, "", "/dashboard");
   },
   autoSignIn: false,
