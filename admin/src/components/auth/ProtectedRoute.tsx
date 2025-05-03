@@ -8,7 +8,6 @@ const ProtectedRoute: React.FC = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      console.info("Auth isLoading:", auth.isLoading);
       console.info("User data:", auth.userData);
       if (!auth.isLoading && auth.userData) {
         console.info("User profile:", auth.userData.profile);
@@ -16,7 +15,6 @@ const ProtectedRoute: React.FC = () => {
         const isAdmin = Array.isArray(roles)
           ? roles.includes("Admin")
           : roles === "Admin";
-        console.info("Is admin:", isAdmin);
         setIsAuthenticated(isAdmin);
       } else if (!auth.isLoading) {
         console.info("No user data or still loading");

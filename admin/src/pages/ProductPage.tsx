@@ -9,10 +9,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
   Input,
   Label,
   Select,
@@ -198,14 +194,14 @@ function ProductPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Name</Label>
+                <Label className="mb-2">Name</Label>
                 <Input
                   value={newProductName}
                   onChange={(e) => setNewProductName(e.target.value)}
                 />
               </div>
               <div>
-                <Label>Category</Label>
+                <Label className="mb-2">Category</Label>
                 <Input
                   value={newProductCategory}
                   onChange={(e) => setNewProductCategory(e.target.value)}
@@ -213,7 +209,7 @@ function ProductPage() {
               </div>
             </div>
             <div>
-              <Label>Description</Label>
+              <Label className="mb-2">Description</Label>
               <Textarea
                 value={newProductDescription}
                 onChange={(e) => setNewProductDescription(e.target.value)}
@@ -222,7 +218,7 @@ function ProductPage() {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <Label>Variants</Label>
+                <Label className="mb-2">Variants</Label>
                 <Button size="sm" onClick={startAddVariant}>
                   Add Variant
                 </Button>

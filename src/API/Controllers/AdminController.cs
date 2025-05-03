@@ -26,7 +26,6 @@ public class AdminController : ControllerBase
     {
         try
         {
-            Console.WriteLine("huhu");
             var response = await _categoryService.GetAllCategoriesAsync();
             return Ok(response);
         }
@@ -68,7 +67,7 @@ public class AdminController : ControllerBase
     }
 
     // Update operation - Admin only
-    [HttpPut("{id}")]
+    [HttpPatch("{id}")]
     public async Task<ActionResult<ApiResponse<CategoryDetailDto>>> UpdateCategory(Guid id, [FromBody] UpdateCategoryRequest request)
     {
         try

@@ -8,11 +8,11 @@ import ErrorPage from "../components/common/ErrorPage";
 import Layout from "../components/layout/Layout";
 import ProductPage from "../pages/ProductPage";
 import Dashboard from "../pages/Dashboard";
-import Category from "../pages/Category";
 import Hero from "../pages/Hero";
 import Customer from "../pages/Customer";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { Spinner } from "@/components/ui";
+import CategoryPage from "../pages/CategoryPage";
 
 // Component to handle sign-in callback
 const SignInCallback = () => {
@@ -21,9 +21,7 @@ const SignInCallback = () => {
   React.useEffect(() => {
     const processSignIn = async () => {
       try {
-        console.log("Processing callback with URL:", window.location.href);
         await auth.userManager.signinRedirectCallback();
-        console.log("Callback processed, redirecting to /dashboard");
         window.history.replaceState(null, "", "/dashboard");
         window.location.href = "/dashboard";
       } catch (error) {
@@ -111,7 +109,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/category",
-        element: <Layout children={<Category />} />,
+        element: <Layout children={<CategoryPage />} />,
         errorElement: <ErrorPage />,
       },
       {

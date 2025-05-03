@@ -25,6 +25,7 @@
     "@reduxjs/toolkit": "^2.6.1",
     "@stripe/react-stripe-js": "^3.6.0",
     "@stripe/stripe-js": "^7.0.0",
+    "@supabase/supabase-js": "^2.49.4",
     "@tailwindcss/vite": "^4.0.17",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
