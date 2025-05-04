@@ -1,321 +1,272 @@
-import React, { useState } from "react";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Textarea,
-} from "@/components/ui";
-import { Pencil, Trash } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import toast from "react-hot-toast/headless";
+import useAxios from "@/hooks/useAxios";
+import ProductFilters from "@/components/common/product/product-filter";
+import ProductTable from "@/components/common/product/product-table";
+import ProductDialog from "@/components/dialog/product-dialog";
+import { uploadProductImage, updateProductImage } from "@/lib/productImages";
+
+interface VariantAttribute {
+  name: string;
+  value: string;
+}
 
 interface Variant {
-  id: number;
+  id: string;
   name: string;
   sku: string;
   price: number;
   stock: number;
+  attributes: VariantAttribute[];
+}
+
+interface ProductImage {
+  id: string;
+  imageUrl: string;
+  isPrimary: boolean;
 }
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
-  category: string;
-  description: string;
+  price: number;
+  images: ProductImage[];
+  mainImageUrl: string;
+  categoryId: string;
+  categoryName: string;
   variants: Variant[];
 }
 
+interface Category {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+}
+
 function ProductPage() {
-  // UI-only states
+  const { axiosInstance, isLoading } = useAxios();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [openProductDialog, setOpenProductDialog] = useState(false);
-  const [openVariantDialog, setOpenVariantDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
-
   const [newProductName, setNewProductName] = useState("");
-  const [newProductCategory, setNewProductCategory] = useState("");
-  const [newProductDescription, setNewProductDescription] = useState("");
-  const [variants, setVariants] = useState<Variant[]>([]);
-
-  const [variantName, setVariantName] = useState("");
-  const [variantSku, setVariantSku] = useState("");
-  const [variantPrice, setVariantPrice] = useState("");
-  const [variantStock, setVariantStock] = useState("");
-
-  // Filters
   const [categoryFilter, setCategoryFilter] = useState("");
   const [sortOption, setSortOption] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
 
+  // Fetch products
+  const fetchProducts = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get("/product");
+      if (response.data.code === 200) {
+        console.log("Fetched products:", response.data.data);
+        setProducts(response.data.data);
+      } else {
+        toast.error("Error fetching products");
+      }
+    } catch (err) {
+      toast.error("Error fetching products");
+    }
+  }, [axiosInstance]);
+
+  // Fetch categories
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get("/category");
+      if (response.data.code === 200) {
+        setCategories(response.data.data);
+      } else {
+        toast.error("Error fetching categories");
+      }
+    } catch (err) {
+      toast.error("Error fetching categories");
+    }
+  }, [axiosInstance]);
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
+
   const handleAddProduct = () => {
     setEditingProduct(null);
     setNewProductName("");
-    setNewProductCategory("");
-    setNewProductDescription("");
-    setVariants([]);
     setOpenProductDialog(true);
   };
 
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setNewProductName(product.name);
-    setNewProductCategory(product.category);
-    setNewProductDescription(product.description);
-    setVariants(product.variants);
     setOpenProductDialog(true);
   };
 
-  const startAddVariant = () => {
-    setEditingVariant(null);
-    setVariantName("");
-    setVariantSku("");
-    setVariantPrice("");
-    setVariantStock("");
-    setOpenVariantDialog(true);
+  const handleSaveProduct = async () => {
+    if (!newProductName.trim()) {
+      toast.error("Product name is required");
+      return;
+    }
+    try {
+      if (editingProduct) {
+        await axiosInstance.patch(`/product/${editingProduct.id}`, {
+          name: newProductName,
+        });
+        toast.success("Product updated successfully");
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === editingProduct.id ? { ...p, name: newProductName } : p
+          )
+        );
+      } else {
+        await axiosInstance.post("/product", { name: newProductName });
+        toast.success("Product created successfully");
+        fetchProducts();
+      }
+      setOpenProductDialog(false);
+    } catch (err: any) {
+      toast.error(err.message || "Error saving product");
+    }
   };
 
-  const startEditVariant = (variant: Variant) => {
-    setEditingVariant(variant);
-    setVariantName(variant.name);
-    setVariantSku(variant.sku);
-    setVariantPrice(variant.price.toString());
-    setVariantStock(variant.stock.toString());
-    setOpenVariantDialog(true);
+  const handleDeleteProduct = async (id: string) => {
+    try {
+      await axiosInstance.delete(`/product/${id}`);
+      toast.success("Product deleted successfully");
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err: any) {
+      toast.error(err.message || "Error deleting product");
+    }
   };
 
-  const saveVariant = () => {
-    if (!variantName || !variantSku || !variantPrice || !variantStock) return;
-    if (editingVariant) {
-      setVariants((prev) =>
-        prev.map((v) =>
-          v.id === editingVariant.id
+  const handleChangeImage = async (
+    id: string,
+    file: File,
+    existingImageUrl?: string
+  ) => {
+    try {
+      let newImageUrl: string;
+      // Find the product to get its images array
+      const product = products.find((p) => p.id === id);
+      if (!product) {
+        throw new Error("Product not found");
+      }
+
+      // Find the current primary image
+      const primaryImage = product.images.find((img) => img.isPrimary);
+      const isValidSupabaseUrl =
+        primaryImage &&
+        primaryImage.imageUrl &&
+        primaryImage.imageUrl.includes("nt-bucket") &&
+        primaryImage.imageUrl.includes("product-images/");
+
+      if (isValidSupabaseUrl && primaryImage) {
+        const filePath = primaryImage.imageUrl.split("/").slice(-2).join("/");
+        if (!filePath || !filePath.includes("product-images/")) {
+          console.error("Invalid file path extracted:", {
+            imageUrl: primaryImage.imageUrl,
+            filePath,
+          });
+          throw new Error("Invalid existing image URL");
+        }
+        console.log("Updating existing image:", { id, filePath });
+        newImageUrl = await updateProductImage(file, filePath);
+      } else {
+        console.log("Uploading new image for product:", {
+          id,
+          existingImageUrl,
+        });
+        newImageUrl = await uploadProductImage(file);
+      }
+
+      // Construct the updated images array
+      const updatedImages = product.images.map((img) => ({
+        id: img.id,
+        imageUrl: img.isPrimary ? newImageUrl : img.imageUrl,
+        isMain: img.isPrimary,
+      }));
+
+      // If no primary image exists, add a new one
+      if (!primaryImage) {
+        updatedImages.push({
+          id: crypto.randomUUID(), // Generate a new UUID for the image
+          imageUrl: newImageUrl,
+          isMain: true,
+        });
+      }
+
+      console.log("Sending PATCH request with images:", updatedImages);
+      await axiosInstance.patch(`/product/${id}`, {
+        images: updatedImages,
+      });
+
+      toast.success("Image updated successfully");
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === id
             ? {
-                ...v,
-                name: variantName,
-                sku: variantSku,
-                price: parseFloat(variantPrice),
-                stock: parseInt(variantStock, 10),
+                ...p,
+                images: updatedImages.map((img) => ({
+                  id: img.id,
+                  imageUrl: img.imageUrl,
+                  isPrimary: img.isMain,
+                })),
+                mainImageUrl: newImageUrl, // Update for backward compatibility
               }
-            : v
+            : p
         )
       );
-    } else {
-      const newId = Date.now();
-      setVariants((prev) => [
-        ...prev,
-        {
-          id: newId,
-          name: variantName,
-          sku: variantSku,
-          price: parseFloat(variantPrice),
-          stock: parseInt(variantStock, 10),
-        },
-      ]);
+    } catch (err: any) {
+      console.error("Error in handleChangeImage:", {
+        error: err.message,
+        existingImageUrl,
+      });
+      toast.error(err.message || "Error updating image");
     }
-    setOpenVariantDialog(false);
   };
 
-  const deleteVariant = (id: number) => {
-    setVariants((prev) => prev.filter((v) => v.id !== id));
-  };
+  // Filter and sort products
+  const filteredProducts = products
+    .filter((product) =>
+      product.name.toLowerCase().includes(searchKeyword.toLowerCase())
+    )
+    .filter((product) =>
+      categoryFilter && categoryFilter !== "all"
+        ? product.categoryName === categoryFilter
+        : true
+    )
+    .sort((a, b) => {
+      if (sortOption === "name-asc") return a.name.localeCompare(b.name);
+      if (sortOption === "name-desc") return b.name.localeCompare(a.name);
+      return 0;
+    });
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold">Products</h1>
-        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <Input
-            placeholder="Search products..."
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-          />
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Filter Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="mice">Mice</SelectItem>
-              <SelectItem value="keyboards">Keyboards</SelectItem>
-              <SelectItem value="headsets">Headsets</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sortOption} onValueChange={setSortOption}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Sort By" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name-asc">Name A-Z</SelectItem>
-              <SelectItem value="name-desc">Name Z-A</SelectItem>
-              <SelectItem value="date-newest">Newest</SelectItem>
-              <SelectItem value="date-oldest">Oldest</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button onClick={handleAddProduct}>Add Product</Button>
-        </div>
-      </div>
-
-      {/* Placeholder for Product Table (waiting for API connection) */}
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Product List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground text-center py-8">
-            Products will be listed here after API integration.
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Add/Edit Product Dialog */}
-      <Dialog open={openProductDialog} onOpenChange={setOpenProductDialog}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editingProduct ? "Edit Product" : "Add Product"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="mb-2">Name</Label>
-                <Input
-                  value={newProductName}
-                  onChange={(e) => setNewProductName(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label className="mb-2">Category</Label>
-                <Input
-                  value={newProductCategory}
-                  onChange={(e) => setNewProductCategory(e.target.value)}
-                />
-              </div>
-            </div>
-            <div>
-              <Label className="mb-2">Description</Label>
-              <Textarea
-                value={newProductDescription}
-                onChange={(e) => setNewProductDescription(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label className="mb-2">Variants</Label>
-                <Button size="sm" onClick={startAddVariant}>
-                  Add Variant
-                </Button>
-              </div>
-              {variants.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>SKU</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Stock</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {variants.map((variant) => (
-                      <TableRow key={variant.id}>
-                        <TableCell>{variant.name}</TableCell>
-                        <TableCell>{variant.sku}</TableCell>
-                        <TableCell>${variant.price.toFixed(2)}</TableCell>
-                        <TableCell>{variant.stock}</TableCell>
-                        <TableCell className="text-right space-x-2">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => startEditVariant(variant)}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => deleteVariant(variant.id)}
-                          >
-                            <Trash className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No variants added yet.
-                </p>
-              )}
-            </div>
-
-            <Button
-              className="w-full"
-              disabled={variants.length === 0}
-              onClick={() => setOpenProductDialog(false)}
-            >
-              Save Product
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Variant Dialog */}
-      <Dialog open={openVariantDialog} onOpenChange={setOpenVariantDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingVariant ? "Edit Variant" : "Add Variant"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              value={variantName}
-              onChange={(e) => setVariantName(e.target.value)}
-              placeholder="Variant Name"
-            />
-            <Input
-              value={variantSku}
-              onChange={(e) => setVariantSku(e.target.value)}
-              placeholder="SKU"
-            />
-            <Input
-              value={variantPrice}
-              onChange={(e) => setVariantPrice(e.target.value)}
-              placeholder="Price"
-              type="number"
-            />
-            <Input
-              value={variantStock}
-              onChange={(e) => setVariantStock(e.target.value)}
-              placeholder="Stock"
-              type="number"
-            />
-            <Button className="w-full" onClick={saveVariant}>
-              {editingVariant ? "Save Changes" : "Add Variant"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ProductFilters
+        searchKeyword={searchKeyword}
+        setSearchKeyword={setSearchKeyword}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        sortOption={sortOption}
+        setSortOption={setSortOption}
+        categories={categories.map((c) => c.name)}
+        onAddProduct={handleAddProduct}
+      />
+      <ProductTable
+        products={filteredProducts}
+        onEdit={handleEditProduct}
+        onDelete={handleDeleteProduct}
+        onChangeImage={handleChangeImage}
+      />
+      <ProductDialog
+        open={openProductDialog}
+        onOpenChange={setOpenProductDialog}
+        editingProduct={editingProduct}
+        newProductName={newProductName}
+        setNewProductName={setNewProductName}
+        onSave={handleSaveProduct}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

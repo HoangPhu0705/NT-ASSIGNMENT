@@ -60,7 +60,9 @@ public class ProductService : IProductService
 
         if (request.Images != null && request.Images.Any())
         {
-            // Process existing images - update or mark for deletion
+            // Find which image should be primary
+            var primaryImageRequest = request.Images.FirstOrDefault(i => i.IsMain && !i.IsDeleted);
+    
             foreach (var existingImage in product.Images.ToList())
             {
                 var updatedImage = request.Images.FirstOrDefault(i => i.Id == existingImage.Id);
@@ -72,7 +74,8 @@ public class ProductService : IProductService
                 else
                 {
                     existingImage.ImageUrl = updatedImage.ImageUrl;
-                    existingImage.IsPrimary = updatedImage.IsMain;
+                    // Set IsPrimary based on which image is designated as primary
+                    existingImage.IsPrimary = (primaryImageRequest != null && updatedImage.Id == primaryImageRequest.Id);
                 }
             }
 
@@ -83,10 +86,12 @@ public class ProductService : IProductService
                 {
                     ProductId = product.Id,
                     ImageUrl = newImage.ImageUrl,
-                    IsPrimary = newImage.IsMain
+                    IsPrimary = (primaryImageRequest != null && primaryImageRequest.Id == null && 
+                                 primaryImageRequest.ImageUrl == newImage.ImageUrl)
                 });
             }
 
+            // Ensure there's a primary image if we have any images
             if (product.Images.Any() && !product.Images.Any(i => i.IsPrimary))
             {
                 product.Images.First().IsPrimary = true;

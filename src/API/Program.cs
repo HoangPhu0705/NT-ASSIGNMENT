@@ -113,7 +113,6 @@ namespace API
             builder.Services.AddScoped<DbSeeder>();
             builder.Services.AddScoped<OpenIdSeeder>();
             
-
             // Authorization policies
             builder.Services.AddAuthorization(options =>
             {

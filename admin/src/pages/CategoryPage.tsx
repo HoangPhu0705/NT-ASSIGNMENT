@@ -6,10 +6,11 @@ import {
   uploadCategoryImage,
   updateCategoryImage,
   deleteCategoryImage,
-} from "@/lib/supabaseClient";
+} from "@/lib/categoryImages";
 import CategoryDialog from "@/components/dialog/category-dialog";
-import CategoryTable from "@/components/common/category-table";
+import CategoryTable from "@/components/common/category/category-table";
 import ConfirmDialog from "@/components/dialog/confirm-dialog";
+import toast from "react-hot-toast";
 
 interface Category {
   id: string;
@@ -42,7 +43,7 @@ function CategoryPage() {
     const fetchCategories = async () => {
       try {
         const response = await axiosInstance.get<ApiResponse<Category[]>>(
-          "/api/admin/category"
+          "/category"
         );
         if (response.data.succeeded) {
           setCategories(response.data.data);
@@ -50,9 +51,11 @@ function CategoryPage() {
           setApiError(
             response.data.errors?.join(", ") || "Failed to fetch categories"
           );
+          toast.error("Failed to fetch categories");
         }
       } catch (err: any) {
         setApiError(err.message || "Error fetching categories");
+        toast.error("Error fetching categories");
       }
     };
 
@@ -79,17 +82,20 @@ function CategoryPage() {
       }
 
       const response = await axiosInstance.delete<ApiResponse<boolean>>(
-        `/api/admin/category/${confirmDelete}`
+        `/category/${confirmDelete}`
       );
       if (response.data.succeeded) {
         setCategories(categories.filter((c) => c.id !== confirmDelete));
+        toast.success("Category deleted successfully");
       } else {
         setApiError(
           response.data.errors?.join(", ") || "Failed to delete category"
         );
+        toast.error("Failed to delete category");
       }
     } catch (err: any) {
       setApiError(err.message || "Error deleting category");
+      toast.error("Error deleting category");
     } finally {
       setConfirmDelete(null);
     }
@@ -108,7 +114,6 @@ function CategoryPage() {
             .split("/")
             .slice(-2)
             .join("/");
-          console.log("File path:", filePath);
           imageUrl = await updateCategoryImage(data.image, filePath);
         } else {
           imageUrl = await uploadCategoryImage(data.image);
@@ -123,7 +128,7 @@ function CategoryPage() {
 
       if (editingCategory) {
         const response = await axiosInstance.patch<ApiResponse<Category>>(
-          `/api/admin/category/${editingCategory.id}`,
+          `/category/${editingCategory.id}`,
           request
         );
         if (response.data.succeeded) {
@@ -132,6 +137,7 @@ function CategoryPage() {
               c.id === editingCategory.id ? response.data.data : c
             )
           );
+          toast.success("Category updated successfully");
         } else {
           throw new Error(
             response.data.errors?.join(", ") || "Failed to update category"
@@ -139,11 +145,12 @@ function CategoryPage() {
         }
       } else {
         const response = await axiosInstance.post<ApiResponse<Category>>(
-          "/api/admin/category",
+          "/category",
           request
         );
         if (response.data.succeeded) {
           setCategories([...categories, response.data.data]);
+          toast.success("Category created successfully");
         } else {
           throw new Error(
             response.data.errors?.join(", ") || "Failed to create category"
@@ -151,6 +158,7 @@ function CategoryPage() {
         }
       }
     } catch (err: any) {
+      toast.error(err.message || "Error saving category");
       throw new Error(err.message || "Error saving category");
     }
   };

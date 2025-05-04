@@ -78,38 +78,36 @@
             <div class="absolute z-10">
             </div>
         </div>
-        
+
         @if (Model.Products != null && Model.Products.Any())
         {
             @foreach (var product in Model.Products)
             {
-                <div class="relative col-span-1 row-span-1 bg-[#F2F2F2] rounded-2xl h-[27rem] min-w-0 p-5 flex flex-col justify-evenly">
+                <div class="relative col-span-1 row-span-1 bg-[#F2F2F2] rounded-2xl h-[27rem] min-w-0 p-5 flex flex-col">
                     <!-- Heart Icon Link -->
                     <a href="/favorite" class="absolute top-5 right-5 z-10">
                         <i class="hgi hgi-stroke hgi-favourite text-xl font-bold"></i>
                     </a>
                     <!-- Main Card Link -->
-                    <a href="/shop/p/@product.Id" class="flex flex-col justify-evenly h-full">
-                        <img src="@product.MainImageUrl" alt="MX Master 3S" class="object-cover transition-transform duration-200 hover:-translate-y-5">
-                        <h1>@product.Name</h1>
-                        <div class="flex justify-between py-4 h-full">
-                            <p class="text-sm text-[#5C5C5C]">$@product.Price</p>
-                            <!-- Add to Cart Link -->
-                            <a href="/cart/add/mx-master-3s" class="text-sm text-[#5C5C5C] flex items-center">
-                                <span class="mr-2">Add to cart</span>
-                                <i class="hgi hgi-stroke hgi-shopping-cart-01 text-lg"></i>
-                            </a>
+                    <a href="/shop/p/@product.Id" class="flex flex-col h-full">
+                        <!-- Fixed height image container -->
+                        <div class="h-full w-full flex items-center justify-center overflow-hidden">
+                            <img src="@product.MainImageUrl" alt="@product.Name" class="w-full h-full object-contain transition-transform duration-200 hover:-translate-y-2">
+                        </div>
+                        <div class="flex flex-col justify-between flex-grow">
+                            <h1 class="mt-4 text-lg font-medium line-clamp-2">@product.Name</h1>
+                            <div class="flex justify-between items-center mt-2">
+                                <p class="text-sm text-[#5C5C5C]">$@product.Price</p>
+                                <!-- Add to Cart Link -->
+                                <a href="/cart/add/@product.Id" class="text-sm text-[#5C5C5C] flex items-center">
+                                    <span class="mr-2">Add to cart</span>
+                                    <i class="hgi hgi-stroke hgi-shopping-cart-01 text-lg"></i>
+                                </a>
+                            </div>
                         </div>
                     </a>
                 </div>
             }
-
         }
-        
-
-         
-
-
-
     </div>
 </div>

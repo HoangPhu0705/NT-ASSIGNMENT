@@ -1,27 +1,33 @@
 using Application.Interfaces.Categories;
+using Application.Interfaces.Products;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Validation.AspNetCore;
 using SharedViewModels.Category;
+using SharedViewModels.Product;
 using SharedViewModels.Shared;
 
 namespace API.Controllers;
 
-[Route("api/admin/category")]
+[Route("api/admin")]
 [ApiController]
 [Authorize(
-    AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme, 
+    AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme,
     Roles = "Admin")]
 public class AdminController : ControllerBase
 {
-    private ICategoryService _categoryService;
+    private readonly ICategoryService _categoryService;
+    private readonly IProductService _productService;
 
-    public AdminController(ICategoryService categoryService)
+    public AdminController(ICategoryService categoryService, IProductService productService)
     {
         _categoryService = categoryService;
+        _productService = productService;
     }
+
+    #region Category Operations
     
-    [HttpGet]
+    [HttpGet("category")]
     public async Task<ActionResult<ApiResponse<IEnumerable<CategoryDto>>>> GetCategories()
     {
         try
@@ -34,8 +40,8 @@ public class AdminController : ControllerBase
             return BadRequest(ApiResponse<string>.Error(ex.Message));
         }
     }
-    
-    [HttpGet("{id}")]
+
+    [HttpGet("category/{id}")]
     public async Task<ActionResult<ApiResponse<CategoryDetailDto>>> GetCategoryById(Guid id)
     {
         try
@@ -51,8 +57,7 @@ public class AdminController : ControllerBase
         }
     }
 
-    // Create operation - Admin only
-    [HttpPost]
+    [HttpPost("category")]
     public async Task<ActionResult<ApiResponse<CategoryDetailDto>>> CreateCategory([FromBody] CreateCategoryRequest request)
     {
         try
@@ -66,8 +71,7 @@ public class AdminController : ControllerBase
         }
     }
 
-    // Update operation - Admin only
-    [HttpPatch("{id}")]
+    [HttpPatch("category/{id}")]
     public async Task<ActionResult<ApiResponse<CategoryDetailDto>>> UpdateCategory(Guid id, [FromBody] UpdateCategoryRequest request)
     {
         try
@@ -83,8 +87,7 @@ public class AdminController : ControllerBase
         }
     }
 
-    // Delete operation - Admin only
-    [HttpDelete("{id}")]
+    [HttpDelete("category/{id}")]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteCategory(Guid id)
     {
         try
@@ -100,4 +103,113 @@ public class AdminController : ControllerBase
         }
     }
     
+    #endregion
+
+    #region Product Operations
+    
+    [HttpGet("product")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<ProductDto>>>> GetProducts()
+    {
+        try
+        {
+            var response = await _productService.GetAllProductsAsync();
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<string>.Error(ex.Message));
+        }
+    }
+
+    [HttpGet("product/{id}")]
+    public async Task<ActionResult<ApiResponse<ProductDetailDto>>> GetProductById(Guid id)
+    {
+        try
+        {
+            var response = await _productService.GetProductByIdAsync(id);
+            if (!response.Succeeded)
+                return NotFound(response);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<string>.Error(ex.Message));
+        }
+    }
+
+    [HttpPost("product")]
+    public async Task<ActionResult<ApiResponse<ProductDetailDto>>> CreateProduct([FromBody] CreateProductRequest request)
+    {
+        try
+        {
+            var response = await _productService.CreateProductAsync(request);
+            return CreatedAtAction(nameof(GetProductById), new { id = response.Data.Id }, response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<string>.Error(ex.Message));
+        }
+    }
+
+    [HttpPatch("product/{id}")]
+    public async Task<ActionResult<ApiResponse<ProductDetailDto>>> UpdateProduct(Guid id, [FromBody] UpdateProductRequest request)
+    {
+        try
+        {
+            var response = await _productService.UpdateProductAsync(id, request);
+            if (!response.Succeeded)
+                return NotFound(response);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<string>.Error(ex.Message));
+        }
+    }
+
+    [HttpDelete("product/{id}")]
+    public async Task<ActionResult<ApiResponse<bool>>> DeleteProduct(Guid id)
+    {
+        try
+        {
+            var response = await _productService.DeleteProductAsync(id);
+            if (!response.Succeeded)
+                return NotFound(response);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<string>.Error(ex.Message));
+        }
+    }
+
+    [HttpGet("product/category/{categoryId}")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<ProductDto>>>> GetProductsByCategory(Guid categoryId)
+    {
+        try
+        {
+            var response = await _productService.GetProductsByCategoryAsync(categoryId);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<string>.Error(ex.Message));
+        }
+    }
+
+    [HttpGet("product/search")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<ProductDto>>>> SearchProducts([FromQuery] string term)
+    {
+        try
+        {
+            var response = await _productService.SearchProductsAsync(term);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<string>.Error(ex.Message));
+        }
+    }
+    
+    #endregion
 }

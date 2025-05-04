@@ -20,7 +20,7 @@ const useAxios = (): UseAxiosReturn => {
 
   const axiosInstance = useMemo(() => {
     return axios.create({
-      baseURL: import.meta.env.VITE_API_BASE_URL, // https://localhost:7130
+      baseURL: import.meta.env.VITE_API_BASE_URL + "/api/admin", // https://localhost:7130
       headers: {
         "Content-Type": "application/json",
       },
@@ -78,18 +78,26 @@ const useAxios = (): UseAxiosReturn => {
   useEffect(() => {
     const requestInterceptor = axiosInstance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
+        setIsLoading(true); // Set loading to true for every request
         if (auth.userData?.access_token) {
           config.headers = config.headers || {};
           config.headers.Authorization = `Bearer ${auth.userData.access_token}`;
         }
         return config;
       },
-      (err) => Promise.reject(err)
+      (err) => {
+        setIsLoading(false); // Reset loading on request error
+        return Promise.reject(err);
+      }
     );
 
     const responseInterceptor = axiosInstance.interceptors.response.use(
-      (response: AxiosResponse) => response,
+      (response: AxiosResponse) => {
+        setIsLoading(false); // Reset loading on successful response
+        return response;
+      },
       async (err) => {
+        setIsLoading(false); // Reset loading on response error
         const originalRequest = err.config;
         if (err.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
@@ -98,6 +106,7 @@ const useAxios = (): UseAxiosReturn => {
             originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
             return axiosInstance(originalRequest);
           } catch (refreshErr) {
+            setError(err.message);
             return Promise.reject(refreshErr);
           }
         }

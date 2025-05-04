@@ -15,7 +15,8 @@ namespace CustomerSite.Controllers
             _categoryService = categoryService;
         }
         public IActionResult Index()
-        {
+        {   
+            
             return View(User);
         }
     }

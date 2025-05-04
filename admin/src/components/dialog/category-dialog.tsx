@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -8,6 +9,7 @@ import {
   Input,
   Label,
 } from "@/components/ui";
+import { Loader2 } from "lucide-react";
 
 interface Category {
   id: string;
@@ -144,11 +146,16 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
             onClick={handleSubmit}
             disabled={isLoading}
           >
-            {isLoading
-              ? "Saving..."
-              : category
-              ? "Save Changes"
-              : "Add Category"}
+            {isLoading ? (
+              <>
+                <Loader2 className="animate-spin" />
+                Please wait
+              </>
+            ) : category ? (
+              "Save Changes"
+            ) : (
+              "Add Category"
+            )}
           </Button>
         </div>
       </DialogContent>

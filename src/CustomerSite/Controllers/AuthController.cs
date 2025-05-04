@@ -60,8 +60,14 @@ namespace CustomerSite.Controllers
         [HttpGet]
         [Route("profile")]
         public IActionResult Profile()
-        {
-            return View(User.Claims);
+        {   
+            string accessToken = HttpContext.GetTokenAsync(OpenIdConnectDefaults.AuthenticationScheme, "access_token").Result;
+            var testModel = new TestModel
+            {
+                AccessToken = accessToken,
+                Claims = User.Claims.ToList()
+            };
+            return View(testModel);
         }
 
         [HttpGet]
@@ -143,4 +149,12 @@ namespace CustomerSite.Controllers
             return Challenge(properties, "Google");
         }
     }
+    
+    
+    public class TestModel
+    {
+        public string AccessToken { get; set; }
+        public List<Claim> Claims { get; set; }
+    }
+    
 }
