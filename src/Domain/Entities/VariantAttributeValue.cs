@@ -8,6 +8,8 @@ public class VariantAttributeValue
     public Guid Id { get; set; }
     public Guid ProductVariantAttributeId { get; set; }
     public Guid ProductVariantId { get; set; }
+    
+    public string Name { get; set; }
     public string Value { get; set; }
     
     public ProductVariantAttribute ProductVariantAttribute { get; set; }

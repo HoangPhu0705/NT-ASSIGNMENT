@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast/headless";
 import useAxios from "@/hooks/useAxios";
 import ProductFilters from "@/components/common/product/product-filter";
 import ProductTable from "@/components/common/product/product-table";
-import ProductDialog from "@/components/dialog/product-dialog";
-import { uploadProductImage, updateProductImage } from "@/lib/productImages";
+import { Button } from "@/components/ui";
+import { updateProductImage, uploadProductImage } from "@/lib/productImages";
 
 interface VariantAttribute {
   name: string;
@@ -46,11 +49,9 @@ interface Category {
 
 function ProductPage() {
   const { axiosInstance, isLoading } = useAxios();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [openProductDialog, setOpenProductDialog] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [newProductName, setNewProductName] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [sortOption, setSortOption] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -90,42 +91,11 @@ function ProductPage() {
   }, [fetchProducts, fetchCategories]);
 
   const handleAddProduct = () => {
-    setEditingProduct(null);
-    setNewProductName("");
-    setOpenProductDialog(true);
+    navigate("/product/add");
   };
 
   const handleEditProduct = (product: Product) => {
-    setEditingProduct(product);
-    setNewProductName(product.name);
-    setOpenProductDialog(true);
-  };
-
-  const handleSaveProduct = async () => {
-    if (!newProductName.trim()) {
-      toast.error("Product name is required");
-      return;
-    }
-    try {
-      if (editingProduct) {
-        await axiosInstance.patch(`/product/${editingProduct.id}`, {
-          name: newProductName,
-        });
-        toast.success("Product updated successfully");
-        setProducts((prev) =>
-          prev.map((p) =>
-            p.id === editingProduct.id ? { ...p, name: newProductName } : p
-          )
-        );
-      } else {
-        await axiosInstance.post("/product", { name: newProductName });
-        toast.success("Product created successfully");
-        fetchProducts();
-      }
-      setOpenProductDialog(false);
-    } catch (err: any) {
-      toast.error(err.message || "Error saving product");
-    }
+    navigate(`/product/edit/${product.id}`);
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -188,7 +158,7 @@ function ProductPage() {
       // If no primary image exists, add a new one
       if (!primaryImage) {
         updatedImages.push({
-          id: crypto.randomUUID(), // Generate a new UUID for the image
+          id: crypto.randomUUID(),
           imageUrl: newImageUrl,
           isMain: true,
         });
@@ -210,7 +180,7 @@ function ProductPage() {
                   imageUrl: img.imageUrl,
                   isPrimary: img.isMain,
                 })),
-                mainImageUrl: newImageUrl, // Update for backward compatibility
+                mainImageUrl: newImageUrl,
               }
             : p
         )
@@ -242,6 +212,12 @@ function ProductPage() {
 
   return (
     <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Products</h1>
+        <Button onClick={handleAddProduct} disabled={isLoading}>
+          Add Product
+        </Button>
+      </div>
       <ProductFilters
         searchKeyword={searchKeyword}
         setSearchKeyword={setSearchKeyword}
@@ -257,15 +233,6 @@ function ProductPage() {
         onEdit={handleEditProduct}
         onDelete={handleDeleteProduct}
         onChangeImage={handleChangeImage}
-      />
-      <ProductDialog
-        open={openProductDialog}
-        onOpenChange={setOpenProductDialog}
-        editingProduct={editingProduct}
-        newProductName={newProductName}
-        setNewProductName={setNewProductName}
-        onSave={handleSaveProduct}
-        isLoading={isLoading}
       />
     </div>
   );

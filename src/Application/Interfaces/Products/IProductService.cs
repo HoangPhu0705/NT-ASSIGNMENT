@@ -12,4 +12,5 @@ public interface IProductService
     Task<ApiResponse<bool>> DeleteProductAsync(Guid id);
     Task<ApiResponse<IEnumerable<ProductDto>>> GetProductsByCategoryAsync(Guid categoryId);
     Task<ApiResponse<IEnumerable<ProductDto>>> SearchProductsAsync(string searchTerm);
+    Task<ApiResponse<bool>> DeleteProductVariantAsync(Guid productId, Guid variantId);
 }

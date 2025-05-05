@@ -31,6 +31,23 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --animate-spinIn: spinIn 30s linear infinite;
+  --animate-spinOut: spinOut 10s linear infinite;
+
+  @keyframes spinIn {
+    to {
+      transform: rotate(18deg);
+    }
+  }
+
+  @keyframes spinOut {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -152,6 +169,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

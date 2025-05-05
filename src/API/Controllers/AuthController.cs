@@ -33,6 +33,7 @@ namespace API.Controllers
             _userManager = userManager;
         }
 
+        #region REGISTER AND CONFIRM EMAIL
         [HttpPost("~/api/auth/register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserRequest request)
         {
@@ -78,8 +79,10 @@ namespace API.Controllers
                 return BadRequest(ApiResponse<string>.Error(ex.Message));
             }
         }
-
-       [HttpPost("~/connect/token"), IgnoreAntiforgeryToken, Produces("application/json")]
+        #endregion
+        
+        #region OPENIDDICT ENPOINTS IMPLEMENTATION
+        [HttpPost("~/connect/token"), IgnoreAntiforgeryToken, Produces("application/json")]
         public async Task<IActionResult> Exchange()
         {
             var request = HttpContext.GetOpenIddictServerRequest() ??
@@ -285,7 +288,10 @@ namespace API.Controllers
             }
             return Ok(claims);
         }
-
+        
+        #endregion
+        
+        #region Private methods
         private async Task<ClaimsPrincipal> CreateClaimsPrincipalAsync(User user)
         {
             var principal = await _signInManager.CreateUserPrincipalAsync(user);
@@ -303,16 +309,6 @@ namespace API.Controllers
             identity.AddClaim(new Claim("email", user.Email ?? string.Empty));
 
             return principal;
-        }
-
-        private IActionResult ForbidWithError(string error, string description)
-        {
-            var properties = new AuthenticationProperties(new Dictionary<string, string?>
-            {
-                [OpenIddictServerAspNetCoreConstants.Properties.Error] = error,
-                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = description
-            });
-            return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
         
         private static IEnumerable<string> GetDestinations(Claim claim)
@@ -359,5 +355,6 @@ namespace API.Controllers
                     yield break;
             }
         }
+        #endregion
     }
 }

@@ -13,6 +13,7 @@ import Customer from "../pages/Customer";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { Spinner } from "@/components/ui";
 import CategoryPage from "../pages/CategoryPage";
+import ProductForm from "@/pages/ProductForm";
 
 // Component to handle sign-in callback
 const SignInCallback = () => {
@@ -104,6 +105,16 @@ const router = createBrowserRouter([
       {
         path: "/product",
         element: <Layout children={<ProductPage />} />,
+        errorElement: <ErrorPage />,
+      },
+      {
+        path: "/product/add",
+        element: <Layout children={<ProductForm />} />,
+        errorElement: <ErrorPage />,
+      },
+      {
+        path: "/product/edit/:id",
+        element: <Layout children={<ProductForm />} />,
         errorElement: <ErrorPage />,
       },
       {

@@ -16,7 +16,6 @@ public class ProductService : IProductService
     {
         _productRepository = productRepository;
         _mapper = mapper;
-
     }
 
     public async Task<ApiResponse<IEnumerable<ProductDto>>> GetAllProductsAsync()
@@ -48,7 +47,7 @@ public class ProductService : IProductService
         return ApiResponse<ProductDetailDto>.Created(productDto);
     }
 
-    public async Task<ApiResponse<ProductDetailDto>> UpdateProductAsync(Guid id, UpdateProductRequest request)
+   public async Task<ApiResponse<ProductDetailDto>> UpdateProductAsync(Guid id, UpdateProductRequest request)
     {
         var product = await _productRepository.GetByIdAsync(id);
         if (product == null)
@@ -58,24 +57,27 @@ public class ProductService : IProductService
         if (request.Description != null) product.Description = request.Description;
         if (request.CategoryId.HasValue) product.CategoryId = request.CategoryId.Value;
 
-        if (request.Images != null && request.Images.Any())
+        if (request.Images != null)
         {
-            // Find which image should be primary
-            var primaryImageRequest = request.Images.FirstOrDefault(i => i.IsMain && !i.IsDeleted);
-    
-            foreach (var existingImage in product.Images.ToList())
-            {
-                var updatedImage = request.Images.FirstOrDefault(i => i.Id == existingImage.Id);
+            var imageIdsToDelete = request.Images
+                .Where(i => i.Id != null && i.IsDeleted)
+                .Select(i => i.Id.Value)
+                .ToList();
 
-                if (updatedImage == null || updatedImage.IsDeleted)
+            if (imageIdsToDelete.Any())
+            {
+                await _productRepository.DeleteProductImagesAsync(imageIdsToDelete);
+                product.Images = product.Images.Where(img => !imageIdsToDelete.Contains(img.Id)).ToList();
+            }
+
+            // Update existing images
+            foreach (var imageToUpdate in request.Images.Where(i => i.Id != null && !i.IsDeleted))
+            {
+                var existingImage = product.Images.FirstOrDefault(i => i.Id == imageToUpdate.Id);
+                if (existingImage != null)
                 {
-                    product.Images.Remove(existingImage);
-                }
-                else
-                {
-                    existingImage.ImageUrl = updatedImage.ImageUrl;
-                    // Set IsPrimary based on which image is designated as primary
-                    existingImage.IsPrimary = (primaryImageRequest != null && updatedImage.Id == primaryImageRequest.Id);
+                    existingImage.ImageUrl = imageToUpdate.ImageUrl;
+                    existingImage.IsPrimary = imageToUpdate.IsMain;
                 }
             }
 
@@ -86,20 +88,80 @@ public class ProductService : IProductService
                 {
                     ProductId = product.Id,
                     ImageUrl = newImage.ImageUrl,
-                    IsPrimary = (primaryImageRequest != null && primaryImageRequest.Id == null && 
-                                 primaryImageRequest.ImageUrl == newImage.ImageUrl)
+                    IsPrimary = newImage.IsMain
                 });
             }
 
-            // Ensure there's a primary image if we have any images
+            // Ensure at least one image is primary
             if (product.Images.Any() && !product.Images.Any(i => i.IsPrimary))
             {
                 product.Images.First().IsPrimary = true;
             }
         }
-        
+
+        // Handle variants
+        if (request.Variants != null)
+        {
+            // Get IDs of variants marked for deletion
+            var variantIdsToDelete = request.Variants
+                .Where(v => v.Id != null && v.IsDeleted)
+                .Select(v => v.Id.Value)
+                .ToList();
+
+            if (variantIdsToDelete.Any())
+            {
+                await _productRepository.DeleteProductVariantsAsync(variantIdsToDelete);
+                product.Variants = product.Variants.Where(v => !variantIdsToDelete.Contains(v.Id)).ToList();
+            }
+
+            // Update existing variants
+            foreach (var variantToUpdate in request.Variants.Where(v => v.Id != null && !v.IsDeleted))
+            {
+                var existingVariant = product.Variants.FirstOrDefault(v => v.Id == variantToUpdate.Id);
+                if (existingVariant != null)
+                {
+                    existingVariant.Name = variantToUpdate.Name;
+                    existingVariant.SKU = variantToUpdate.Sku;
+                    existingVariant.Price = variantToUpdate.Price;
+                    existingVariant.Stock = variantToUpdate.Stock;
+
+                    // Update attributes if provided
+                    if (variantToUpdate.Attributes != null && variantToUpdate.Attributes.Any())
+                    {
+                        await _productRepository.UpdateVariantAttributesAsync(existingVariant, variantToUpdate.Attributes);
+                    }
+                }
+            }
+
+            // Add new variants
+            foreach (var newVariant in request.Variants.Where(v => v.Id == null && !v.IsDeleted))
+            {
+                var variant = new ProductVariant
+                {
+                    ProductId = product.Id,
+                    Name = newVariant.Name,
+                    SKU = newVariant.Sku,
+                    Price = newVariant.Price,
+                    Stock = newVariant.Stock
+                };
+                
+                // Add attributes if provided
+                if (newVariant.Attributes != null)
+                {
+                    variant.AttributeValues = newVariant.Attributes.Select(attr => new VariantAttributeValue
+                    {
+                        // Map attribute properties
+                        Name = attr.Name,
+                        Value = attr.Value
+                    }).ToList();
+                }
+                
+                product.Variants.Add(variant);
+            }
+        }
+
         await _productRepository.UpdateAsync(product);
-        
+
         var updatedProduct = await _productRepository.GetByIdAsync(id);
         var productDto = _mapper.Map<ProductDetailDto>(updatedProduct);
         return ApiResponse<ProductDetailDto>.Success(productDto);
@@ -127,5 +189,20 @@ public class ProductService : IProductService
         var products = await _productRepository.SearchProductsAsync(searchTerm);
         var productsDto = _mapper.Map<IEnumerable<ProductDto>>(products);
         return ApiResponse<IEnumerable<ProductDto>>.Success(productsDto);
+    }
+    
+    public async Task<ApiResponse<bool>> DeleteProductVariantAsync(Guid productId, Guid variantId)
+    {
+        var product = await _productRepository.GetByIdAsync(productId);
+        if (product == null)
+            return ApiResponse<bool>.Error($"Product with ID {productId} not found");
+
+        var variant = product.Variants?.FirstOrDefault(v => v.Id == variantId);
+        if (variant == null)
+            return ApiResponse<bool>.Error($"Variant with ID {variantId} not found in product {productId}");
+
+        await _productRepository.DeleteProductVariantsAsync(new List<Guid> { variantId });
+    
+        return ApiResponse<bool>.Success(true);
     }
 }

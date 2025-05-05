@@ -198,7 +198,7 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("product/search")]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ProductDto>>>> SearchProducts([FromQuery] string term)
+    public async Task<ActionResult<ApiResponse<IEnumerable<ProductDto>>>> SearchProducts([FromQuery] string term) 
     {
         try
         {
@@ -211,5 +211,20 @@ public class AdminController : ControllerBase
         }
     }
     
+    [HttpDelete("product/{productId}/variant/{variantId}")]
+    public async Task<ActionResult<ApiResponse<bool>>> DeleteProductVariant(Guid productId, Guid variantId)
+    {
+        try
+        {
+            var response = await _productService.DeleteProductVariantAsync(productId, variantId);
+            if (!response.Succeeded)
+                return NotFound(response);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse<string>.Error(ex.Message));
+        }
+    }
     #endregion
 }

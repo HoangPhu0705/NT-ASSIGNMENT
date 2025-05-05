@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { supabase } from "./supabaseClient";
+import { supabase } from "./supaBaseClient";
 
 export const uploadCategoryImage = async (file: File): Promise<string> => {
   const fileExt = file.name.split(".").pop();

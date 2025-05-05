@@ -6,7 +6,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Button,
 } from "@/components/ui";
 
 interface ProductFiltersProps {
@@ -28,11 +27,9 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
   sortOption,
   setSortOption,
   categories,
-  onAddProduct,
 }) => {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <h1 className="text-2xl font-bold">Products</h1>
       <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
         <Input
           placeholder="Search products..."
@@ -61,7 +58,6 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             <SelectItem value="name-desc">Name Z-A</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={onAddProduct}>Add Product</Button>
       </div>
     </div>
   );

@@ -1,6 +1,3 @@
-// SharedViewModels/Product/UpdateProductRequest.cs
-using System;
-
 namespace SharedViewModels.Product;
 
 public class UpdateProductRequest
@@ -12,4 +9,6 @@ public class UpdateProductRequest
     public bool? IsFeatured { get; set; }
     public Guid? CategoryId { get; set; }
     public List<UpdateProductImageRequest>? Images { get; set; }
+    public List<UpdateProductVariantRequest>? Variants { get; set; }
+    public bool? IsParent { get; set; }
 }

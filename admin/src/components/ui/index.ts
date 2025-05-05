@@ -15,3 +15,5 @@ export * from "./popover";
 export * from "./spinner";
 export * from "./select";
 export * from "./tooltip";
+export * from "./checkbox";
+export * from "./accordion";
