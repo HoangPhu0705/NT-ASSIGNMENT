@@ -1,12 +1,15 @@
-namespace SharedViewModels.Product;
-
-
-public class ProductVariantDto
+namespace SharedViewModels.Product
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; }
-    public string Sku { get; set; }
-    public decimal Price { get; set; }
-    public int Stock { get; set; }
-    public List<VariantAttributeDto> Attributes { get; set; } = new List<VariantAttributeDto>();
+    public class ProductVariantDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Sku { get; set; }
+        public decimal Price { get; set; }
+        public int Stock { get; set; }
+        public List<VariantAttributeDto> Attributes { get; set; } = new List<VariantAttributeDto>();
+    }
+    
 }
+
+

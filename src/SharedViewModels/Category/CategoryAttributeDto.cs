@@ -1,9 +1,11 @@
-namespace SharedViewModels.Category;
 
-public class CategoryAttributeDto
+namespace SharedViewModels.Category
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; }
-    public bool IsFilterable { get; set; }
-    public List<string> Values { get; set; } = new();
+    public class CategoryAttributeDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public bool IsFilterable { get; set; }
+        public List<string> Values { get; set; }
+    }
 }

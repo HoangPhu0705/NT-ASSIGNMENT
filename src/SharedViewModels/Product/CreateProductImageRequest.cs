@@ -1,7 +1,10 @@
-namespace SharedViewModels.Product;
-
-public class CreateProductImageRequest
+namespace SharedViewModels.Product
 {
-    public string ImageUrl { get; set; }
-    public bool IsPrimary { get; set; }
+    public class CreateProductImageRequest
+    {
+        public string ImageUrl { get; set; }
+        public bool IsPrimary { get; set; }
+        
+    }
+
 }

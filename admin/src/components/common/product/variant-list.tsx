@@ -40,7 +40,7 @@ const VariantList: React.FC<VariantListProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Variants</h2>
-        <Button onClick={onAddVariant} disabled={isLoading}>
+        <Button type="button" onClick={onAddVariant} disabled={isLoading}>
           Add Variant
         </Button>
       </div>

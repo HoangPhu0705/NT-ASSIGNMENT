@@ -1,9 +1,12 @@
-namespace SharedViewModels.Product;
-
-public class UpdateVariantAttributeRequest
+namespace SharedViewModels.Product
 {
-    public Guid? Id { get; set; }  // For existing attributes
-    public string Name { get; set; }
-    public string Value { get; set; }
-    public bool IsDeleted { get; set; }  // To mark attributes for deletion
+    public class UpdateVariantAttributeRequest
+    {
+        public Guid? Id { get; set; }  // For existing attributes
+        public string Name { get; set; }
+        public string Value { get; set; }
+        public bool IsDeleted { get; set; }  // To mark attributes for deletion
+    }
+    
 }
+

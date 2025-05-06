@@ -69,6 +69,7 @@ const AttributeForm: React.FC<AttributeFormProps> = ({
         </div>
       ))}
       <Button
+        type="button"
         variant="outline"
         size="sm"
         onClick={handleAddAttribute}

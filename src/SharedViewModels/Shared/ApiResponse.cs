@@ -6,8 +6,7 @@
         public string Message { get; set; }
         public T Data { get; set; }
         
-        public bool Succeeded => Code is >= 200 and < 300; 
-        
+        public bool Succeeded => Code >= 200 && Code < 300;        
         public ApiResponse()
         {
         }
