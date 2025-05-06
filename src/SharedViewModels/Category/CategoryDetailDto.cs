@@ -1,5 +1,4 @@
 
-
 namespace SharedViewModels.Category
 {
     public class CategoryDetailDto : CategoryDto

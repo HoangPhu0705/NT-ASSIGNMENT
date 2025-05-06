@@ -1,4 +1,5 @@
-﻿@{
+﻿@model List<SharedViewModels.Category.CategoryDto>
+@{
     ViewData["Title"] = "Home page";
 }
 
@@ -141,136 +142,23 @@
     <div class="px-56 py-10">
         <h1 class="text-2xl text-start mb-5">Shop by product category</h1>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-5">
-            <div class="bg-[#EDEEEE] rounded-xl overflow-hidden flex flex-col">
-                <a href="">
-                    <div class="w-full h-50 overflow-hidden p-4">
-                        <img
-                            src="/img/keyboards-cat.png"
-                            alt="Keyboard"
-                            class="object-cover w-full h-full transition-transform duration-500 hover:scale-110 hover:cursor-pointer">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h2 class="text-lg font-medium">Keyboards</h2>
-                    </div>
-                </a>
-            </div>
-            <div class="bg-[#EDEEEE] rounded-xl overflow-hidden flex flex-col">
-                <a href="">
-                    <div class="w-full h-50 overflow-hidden p-4">
-                        <img
-                            src="/img/mice-cat.png"
-                            alt="Mice"
-                            class="object-cover w-full h-full transition-transform duration-500 hover:scale-110 hover:cursor-pointer">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h2 class="text-lg font-medium">Mice</h2>
-                    </div>
-                </a>
-            </div>
-            <div class="bg-[#EDEEEE] rounded-xl overflow-hidden flex flex-col">
-                <a href="">
-                    <div class="w-full h-50 overflow-hidden p-4">
-                        <img
-                            src="/img/conference-camera-cat.png"
-                            alt="Conference camera"
-                            class="object-cover w-full h-full transition-transform duration-500 hover:scale-110 hover:cursor-pointer">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h2 class="text-lg font-medium">Conference Camera</h2>
-                    </div>
-                </a>
-            </div>
-            <div class="bg-[#EDEEEE] rounded-xl overflow-hidden flex flex-col">
-                <a href="">
-                    <div class="w-full h-50 overflow-hidden p-4">
-                        <img
-                            src="/img/headsets-cat.png"
-                            alt="Mice"
-                            class="object-cover w-full h-full transition-transform duration-500 hover:scale-110 hover:cursor-pointer">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h2 class="text-lg font-medium">Headsets</h2>
-                    </div>
-                </a>
-            </div>
-            <div class="bg-[#EDEEEE] rounded-xl overflow-hidden flex flex-col">
-                <a href="">
-                    <div class="w-full h-50 overflow-hidden p-4">
-                        <img
-                            src="/img/webcams-cat.png"
-                            alt="Mice"
-                            class="object-cover w-full h-full transition-transform duration-500 hover:scale-110 hover:cursor-pointer">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h2 class="text-lg font-medium">Webcams</h2>
-                    </div>
-                </a>
-            </div>
-            <div class="bg-[#EDEEEE] rounded-xl overflow-hidden flex flex-col">
-                <a href="">
-                    <div class="w-full h-50 overflow-hidden p-4">
-                        <img
-                            src="/img/mobile-devices-cat.png"
-                            alt="Mice"
-                            class="object-cover w-full h-full transition-transform duration-500 hover:scale-110 hover:cursor-pointer">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h2 class="text-lg font-medium">iPad Keyboard Cases</h2>
-                    </div>
-                </a>
-            </div>
-            <div class="bg-[#EDEEEE] rounded-xl overflow-hidden flex flex-col">
-                <a href="">
-                    <div class="w-full h-50 overflow-hidden p-4">
-                        <img
-                            src="/img/speakers-cat.png"
-                            alt="Mice"
-                            class="object-cover w-full h-full transition-transform duration-500 hover:scale-110 hover:cursor-pointer">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h2 class="text-lg font-medium">Speakers</h2>
-                    </div>
-                </a>
-            </div>
-            <div class="bg-[#EDEEEE] rounded-xl overflow-hidden flex flex-col">
-                <a href="">
-                    <div class="w-full h-50 overflow-hidden p-4">
-                        <img
-                            src="/img/driving-cat.png"
-                            alt="Mice"
-                            class="object-cover w-full h-full transition-transform duration-500 hover:scale-110 hover:cursor-pointer">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h2 class="text-lg font-medium">Driving</h2>
-                    </div>
-                </a>
-            </div>
-            <div class="bg-[#EDEEEE] rounded-xl overflow-hidden flex flex-col">
-                <a href="">
-                    <div class="w-full h-50 overflow-hidden p-4">
-                        <img
-                            src="/img/lighting-cat.png"
-                            alt="Mice"
-                            class="object-cover w-full h-full transition-transform duration-500 hover:scale-110 hover:cursor-pointer">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h2 class="text-lg font-medium">Lightning</h2>
-                    </div>
-                </a>
-            </div>
-            <div class="bg-[#EDEEEE] rounded-xl overflow-hidden flex flex-col">
-                <a href="">
-                    <div class="w-full h-50 overflow-hidden p-4">
-                        <img
-                            src="/img/microphones-cat.png"
-                            alt="Mice"
-                            class="object-cover w-full h-full transition-transform duration-500 hover:scale-110 hover:cursor-pointer">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h2 class="text-lg font-medium">Microphones</h2>
-                    </div>
-                </a>
-            </div>
+            @foreach (var category in Model)
+            {
+                <div class="bg-[#EDEEEE] rounded-xl overflow-hidden flex flex-col">
+                    <a href="">
+                        <div class="w-full h-50 overflow-hidden p-4">
+                            <img
+                                src="@category.ImageUrl"
+                                alt="@category.Name"
+                                class="object-cover w-full h-full transition-transform duration-500 hover:scale-110 hover:cursor-pointer">
+                        </div>
+                        <div class="p-4 text-center">
+                            <h2 class="text-lg font-medium">@category.Name</h2>
+                        </div>
+                    </a>
+                </div>
+            }
+            
         </div> 
     </div>
 

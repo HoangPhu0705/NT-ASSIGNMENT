@@ -175,7 +175,6 @@ namespace API.Controllers
             Console.WriteLine($"[AUTHORIZE] Using scheme: {scheme}");
 
             var result = await HttpContext.AuthenticateAsync(scheme);
-            Console.WriteLine($"[AUTHORIZE] Authentication result: Succeeded={result?.Succeeded}, Principal={result?.Principal?.Identity?.Name}");
 
             if (!result.Succeeded)
             {
@@ -225,7 +224,6 @@ namespace API.Controllers
             }
             else
             {
-                // If client ID cannot be determined, check which scheme the user is authenticated with
                 var isCustomerAuthenticated = HttpContext.User.Identity?.AuthenticationType == "CustomerScheme" 
                     || await HttpContext.AuthenticateAsync("CustomerScheme") is { Succeeded: true };
                     

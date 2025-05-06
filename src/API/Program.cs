@@ -5,12 +5,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
 using Application.Interfaces.Auth;
+using Application.Interfaces.Carts;
 using Application.Interfaces.Categories;
 using Application.Interfaces.Products;
+using Application.Interfaces.Reviews;
 using Application.Services.Auth;
+using Application.Services.Carts;
 using Application.Services.Categories;
 using Application.Services.Categories;
 using Application.Services.Product;
+using Application.Services.Review;
 using Domain.Entities;
 using DotNetEnv;
 using Infrastructure.Data;
@@ -103,15 +107,20 @@ namespace API
                     options.UseAspNetCore();
                 });
 
-            // Register Services
-            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            #region Register Services
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
-            builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<ICartRepository, CartRepository>();
+            builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<IEmailSender, EmailSender>();
             builder.Services.AddScoped<DbSeeder>();
             builder.Services.AddScoped<OpenIdSeeder>();
+            #endregion
             
             // Authorization policies
             builder.Services.AddAuthorization(options =>

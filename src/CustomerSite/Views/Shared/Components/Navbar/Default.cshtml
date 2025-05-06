@@ -1,8 +1,6 @@
 @model System.Security.Claims.ClaimsPrincipal
 
-
-<div class="navbar bg-base-100 px-36 border-b-4 border-base-200 py-0 min-h-[60px]">
-    
+<div class="navbar bg-base-100 px-36 border-b-4 border-base-200 py-0 min-h-[60px] z-50">
     <div class="flex-1">
         <a class="mr-12" href="/">
             <h1 class="text-lg sm:text-lg md:text-2xl font-bold mb-3 flex justify-center items-center gap-1">
@@ -46,40 +44,37 @@
                 <i class="hgi hgi-stroke hgi-search-01"></i>
             </label>
             <a href="" class="btn btn-circle mr-3 bg-transparent border-none shadow-none"><i class="hgi hgi-stroke hgi-favourite text-2xl"></i></a>
-
-            <a href="" class="btn btn-circle mr-3 bg-transparent border-none shadow-none"><i class="hgi hgi-stroke hgi-shopping-cart-02 text-2xl"></i></a>
+            <a href="/cart" class="btn btn-circle mr-3 bg-transparent border-none shadow-none"><i class="hgi hgi-stroke hgi-shopping-cart-02 text-2xl"></i></a>
             <div class="dropdown dropdown-hover dropdown-bottom dropdown-end">
                 <a href="" role="button" class="btn btn-circle mr-3 bg-transparent border-none shadow-none"><i class="hgi hgi-stroke hgi-user text-2xl"></i></a>
                 <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[10] w-72 p-6 shadow">
-  
-                    @if (!User.Identity.IsAuthenticated)
+                    @if (!Model.Identity.IsAuthenticated)
                     {
-                        <div class=" text-lg font-light">
+                        <div class="text-lg font-light">
                             <span class="font-bold">
                                 One account is all you need
-                            </span>Get access to your Nextech account and so much more with <span class="font-bold">Nex ID.</span>
+                            </span>
+                            Get access to your Nextech account and so much more with <span class="font-bold">Nex ID.</span>
                         </div>
                         <li><a href="/auth/login" class="btn mt-4 rounded-full bg-[#4CF6CF] font-bold">LOGIN</a></li>
                         <li><a href="/auth/create-account" class="btn mt-4 rounded-full bg-black text-white font-bold hover:bg-white hover:text-black">CREATE AN ACCOUNT</a></li>
-                    }else 
+                    }
+                    else
                     {
                         <span class="text-lg font-bold mb-5">
-                            HI <span class="uppercase">@User.Identity.Name</span>
+                            HI <span class="uppercase">@Model.Identity.Name</span>
                             <p class="text-sm font-medium text-gray-500">@Model.FindFirst("email")?.Value</p>
                         </span>
-                        <a href="/auth/profile" class="font-medium px-0 hover:bg-transparent hover:underline py-3 ">PROFILE</a>
-                        <a href="/auth/profile" class="font-medium px-0 hover:bg-transparent hover:underline py-3 ">ACCOUNT SETTINGS</a>
+                        <a href="/auth/profile" class="font-medium px-0 hover:bg-transparent hover:underline py-3">PROFILE</a>
+                        <a href="/auth/profile" class="font-medium px-0 hover:bg-transparent hover:underline py-3">ACCOUNT SETTINGS</a>
                         <div class="divider"></div>
                         <a href="/auth/logout" class="group font-medium px-0 hover:bg-transparent hover:underline">
                             LOGOUT
                             <span class="w-10 h-2 bg-[#4CF6CF] inline-block rounded-xl ml-2 transition-all duration-200 group-hover:w-5"></span>
                         </a>
                     }
-                   
-
                 </ul>
             </div>
-
         </div>
     </div>
 </div>

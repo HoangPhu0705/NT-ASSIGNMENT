@@ -1,11 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
-namespace CustomerSite.ViewComponents;
-
-public class NavbarViewComponent : ViewComponent
+namespace CustomerSite.ViewComponents
 {
-    public IViewComponentResult Invoke()
+    public class NavbarViewComponent : ViewComponent
     {
-        return View(User);
+        public IViewComponentResult Invoke()
+        {
+            // Use HttpContext.User, which is already a ClaimsPrincipal
+            var claimsPrincipal = HttpContext.User;
+            return View(claimsPrincipal);
+        }
     }
 }

@@ -1,4 +1,4 @@
-@model SharedViewModels.Product.ProductDetailDto
+@model ProductDetailModel
 @{
     ViewData["Title"] = "Product Detail";
 }
@@ -11,37 +11,34 @@
         </div>
     </div>
 </div>
-@if (Model != null)
+@if (Model.Product != null && Model.Review != null)
 {
     <div class="px-56 pt-20">
         <div class="flex w-full">
             <!-- Existing Images Section -->
             <div class="basis-2/3 flex flex-col">
                 <div class="flex justify-between">
-                    <h1 class="text-5xl">@Model.Name</h1>
+                    <h1 class="text-5xl">@Model.Product.Name</h1>
                     <div class="flex justify-between items-center mt-4">
                         <span class="badge p-4">Best Seller</span>
                     </div>
                 </div>
                 <div class="rating rating-sm mt-2 flex items-center">
-                    <input type="radio" name="rating-9" class="mask mask-star-2" disabled/>
-                    <input type="radio" name="rating-9" class="mask mask-star-2" disabled/>
-                    <input type="radio" name="rating-9" class="mask mask-star-2" disabled/>
-                    <input type="radio" name="rating-9" class="mask mask-star-2" disabled checked="checked"/>
-                    <input type="radio" name="rating-9" class="mask mask-star-2 mr-2" disabled/>
-                    <span class="underline">1.2K</span>
+                    <div id="starContainer" class="flex space-x-1 text-base">
+                        <!-- Stars will be dynamically generated -->
+                    </div>
+                    <span class="underline ml-2">@Model.Review.ReviewCount</span>
                 </div>
 
                 @* Images Grid *@
-                <div class="grid grid-cols-2 grid-rows-2 gap-4 mt-4">
+                <div class="grid grid-cols-2 grid-rows-2 gap-4 mt-4 ">
                     @* Top Row *@
-                    @foreach (var image in Model.Images)
+                    @foreach (var image in Model.Product.Images)
                     {
-                        <div class="relative aspect-square">
-                            <img src="@image.ImageUrl" alt="MX Master 3S" class="object-cover w-full h-full rounded-xl bg-[#F2F2F2]">
+                        <div class="relative bg-[#F2F2F2] p-6 rounded-xl">
+                            <img src="@image.ImageUrl" alt="MX Master 3S" class="object-contain w-full h-full rounded-xl ">
                         </div>
                     }
-
                 </div>
             </div>
 
@@ -55,7 +52,7 @@
                     <p class="text-2xl">Type:</p>
                     <select id="variant-select" class="select select-bordered border-2 border-black w-full max-w-md text-xl rounded-full">
                         <option disabled selected>Select a type</option>
-                        @foreach (var variant in Model.Variants)
+                        @foreach (var variant in Model.Product.Variants)
                         {
                             <option value="@variant.Id" data-price="@variant.Price" data-stock="@variant.Stock" data-attributes="@System.Text.Json.JsonSerializer.Serialize(variant.Attributes)">@variant.Name</option>
                         }
@@ -94,7 +91,7 @@
 
                 <div class="flex flex-col mt-5 gap-5">
                     <h1 class="text-2xl">Description</h1>
-                    <p>@Model.Description</p>
+                    <p>@Model.Product.Description</p>
                 </div>
 
                 <div class="divider"></div>
@@ -109,100 +106,64 @@
         </div>
     </div>
 
-    <!-- Add JavaScript to handle variant selection -->
-    <script>
-           document.getElementById('variant-select').addEventListener('change', function () {
-               const selectedOption = this.options[this.selectedIndex];
-               const price = selectedOption.getAttribute('data-price');
-               const stock = selectedOption.getAttribute('data-stock');
-               const attributes = JSON.parse(selectedOption.getAttribute('data-attributes') || '[]');
-
-               document.getElementById('variant-price').textContent = price;
-
-               const stockElement = document.getElementById('variant-stock');
-               
-               stockElement.textContent = stock;
-               stockElement.className = 'underline' + (stock <= 5 ? ' text-red-500' : ' text-[#337A21]');
-
-               const specsElement = document.getElementById('variant-specs');
-               specsElement.innerHTML = ''; 
-               if (attributes.length === 0) {
-                   const li = document.createElement('li');
-                   li.textContent = 'No specifications available';
-                   li.className = 'text-gray-500';
-                   specsElement.appendChild(li);
-               } else {
-                   attributes.forEach(attr => {
-                       const li = document.createElement('li');
-                       li.className = 'flex items-center gap-2 text-gray-700';
-                       li.innerHTML = `<span class="text-green-500">+</span> ${attr.Name} : ${attr.Value}`;
-                       specsElement.appendChild(li);
-                   });
-               }
-           });
-       </script>
+    
 }
-}
-
 
 @* Review Section *@
 <div class="px-56 pt-20">
     <h1 class="text-3xl font-bold">Reviews</h1>
     <div class="flex mt-5">
+        @* Rating Snapshot Section *@
         <div class="flex-1/2">
             <h2 class="text-xl font-semibold">Rating Snapshot</h2>
             <div class="mt-4">
                 <div class="flex items-center gap-3 mb-2">
                     <span class="w-16 text-sm">5 stars</span>
-                    <progress class="progress w-56" value="75" max="100"></progress>
-                    <span class="text-sm">397</span>
+                    <progress class="progress w-56" value="@Model.Review.RatingCounts["5star"]" max="@Model.Review.ReviewCount"></progress>
+                    <span class="text-sm">@Model.Review.RatingCounts["5star"]</span>
                 </div>
                 <div class="flex items-center gap-3 mb-2">
                     <span class="w-16 text-sm">4 stars</span>
-                    <progress class="progress w-56" value="14" max="100"></progress>
-                    <span class="text-sm">72</span>
+                    <progress class="progress w-56" value="@Model.Review.RatingCounts["4star"]" max="@Model.Review.ReviewCount"></progress>
+                    <span class="text-sm">@Model.Review.RatingCounts["4star"]</span>
                 </div>
                 <div class="flex items-center gap-3 mb-2">
                     <span class="w-16 text-sm">3 stars</span>
-                    <progress class="progress w-56" value="6" max="100"></progress>
-                    <span class="text-sm">31</span>
+                    <progress class="progress w-56" value="@Model.Review.RatingCounts["3star"]" max="@Model.Review.ReviewCount"></progress>
+                    <span class="text-sm">@Model.Review.RatingCounts["3star"]</span>
                 </div>
                 <div class="flex items-center gap-3 mb-2">
                     <span class="w-16 text-sm">2 stars</span>
-                    <progress class="progress w-56" value="4" max="100"></progress>
-                    <span class="text-sm">19</span>
+                    <progress class="progress w-56" value="@Model.Review.RatingCounts["2star"]" max="@Model.Review.ReviewCount"></progress>
+                    <span class="text-sm">@Model.Review.RatingCounts["2star"]</span>
                 </div>
                 <div class="flex items-center gap-3 mb-2">
                     <span class="w-16 text-sm">1 star</span>
-                    <progress class="progress w-56" value="3" max="100"></progress>
-                    <span class="text-sm">14</span>
+                    <progress class="progress w-56" value="@Model.Review.RatingCounts["1star"]" max="@Model.Review.ReviewCount"></progress>
+                    <span class="text-sm">@Model.Review.RatingCounts["1star"]</span>
                 </div>
             </div>
         </div>
         <div class="divider divider-horizontal"></div>
-        
+
         @* Overall Rating *@
         <div class="flex flex-col items-center">
             <h2 class="text-xl font-semibold">Overall Rating</h2>
-            <div class="flex items-center mt-2">
-                <span class="text-4xl font-bold">4.5</span>
+            <div class="flex justify-center items-center mt-2">
+                <span class="text-4xl font-bold">@Model.Review.AverageRating.ToString("0.0")</span>
                 <div class="rating rating-md ml-2">
-                    <input type="radio" name="overall-rating" class="mask mask-star-2" disabled />
-                    <input type="radio" name="overall-rating" class="mask mask-star-2" disabled />
-                    <input type="radio" name="overall-rating" class="mask mask-star-2" disabled />
-                    <input type="radio" name="overall-rating" class="mask mask-star-2" disabled checked="checked"/>
-                    <input type="radio" name="overall-rating" class="mask mask-star-2" disabled />
+                    <input type="radio" name="rating-2" class="mask mask-star-2" checked="checked" disabled />
                 </div>
             </div>
-            <p class="text-sm mt-1">533 Reviews</p>
+            <p class="text-sm mt-1">@Model.Review.ReviewCount Reviews</p>
         </div>
     </div>
-    
+
     @* Write Review *@
     <div class="mt-10">
         @* Review Filter and Sorting *@
         <div class="flex justify-between items-center mb-5">
-            <p class="text-sm">1 - 2 of 2 Reviews</p>
+            <p class="text-sm">@Model.Review.ReviewCount Reviews</p>
             <select class="select select-bordered w-1/2 border-gray-300 rounded-lg">
                 <option disabled selected>Sort by </option>
                 <option>Highest to Lowest Rating</option>
@@ -211,29 +172,143 @@
                 <option>Oldest to Newest</option>
             </select>
         </div>
-        <form action="" class="flex flex-col mb-10 items-end">
-            <input type="text" placeholder="Write your review" class="w-full border-b border-black py-2 focus:outline-none focus:border-t-0 focus:border-l-0 focus:border-r-0 focus:border-b-2 focus:border-black" />
-            <div class="">
-                <button type="submit" class="btn px-10 bg-black text-white mt-3 hover:bg-gray-700">SEND</button>
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="flex justify-start mb-10">
+                <button onclick="window.my_modal_review.showModal()" class="btn px-10 bg-black text-white hover:bg-gray-700">
+                    WRITE A REVIEW
+                </button>
             </div>
-        </form>
+
+            <!-- Review Modal -->
+            <dialog id="my_modal_review" class="modal">
+                <div class="modal-box w-25 bg-[#F2F2F2]">
+                    <h3 class="font-bold text-lg mb-4">Write Your Review</h3>
+
+                    <form id="review-form" class="space-y-4">
+                        <input type="hidden" id="productId" value="@Model.Product.Id" />
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Rating</label>
+                            <div class="rating rating-lg">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <input type="radio" name="rating" value="@i" class="mask mask-star-2 bg-[#1F2937]" @(i == 5 ? "checked" : "") />
+                                }
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="review-text" class="block text-sm font-medium mb-2">Your Review</label>
+                            <textarea id="review-text" class="textarea textarea-bordered w-full h-32" placeholder="Share your experience with this product..."></textarea>
+                        </div>
+
+                        <div class="modal-action">
+                            <button type="button" class="btn bg-white" onclick="window.my_modal_review.close()">CANCEL</button>
+                            <button type="submit" class="btn bg-black text-white hover:bg-gray-700">SUBMIT REVIEW</button>
+                        </div>
+                    </form>
+                </div>
+            </dialog>
+        }
+        else
+        {
+            <div class="flex justify-start mb-10">
+                <a href="@Url.Action("Login", "Auth", new { returnUrl = Context.Request.Path })" class="btn px-10 bg-black text-white hover:bg-gray-700">
+                    SIGN IN TO LEAVE A REVIEW
+                </a>
+            </div>
+        }
+
         @* Reviews List *@
         <div class="space-y-8">
-            @* Review 1 *@
-            <div class="flex flex-col gap-2">
-                <div class="rating rating-sm mb-2">
-                    <input type="radio" name="review-1" class="mask mask-star-2" disabled />
-                    <input type="radio" name="review-1" class="mask mask-star-2" disabled />
-                    <input type="radio" name="review-1" class="mask mask-star-2" disabled />
-                    <input type="radio" name="review-1" class="mask mask-star-2" disabled />
-                    <input type="radio" name="review-1" class="mask mask-star-2" disabled checked="checked"/>
+            @foreach (var review in Model.Review.Reviews)
+            {
+                <div class="flex flex-col gap-2">
+                    <div class="rating rating-sm mb-2">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <input type="radio" name="review-@review.Id" class="mask mask-star-2" checked="@(review.Rating == i)" disabled />
+                        }
+                    </div>
+                    <p class="mt-2">@review.ReviewText</p>
+                    <p class="text-sm text-gray-600">@review.UserName • @review.ReviewDate.ToString("d MMM yyyy")</p>
+                    <div class="divider"></div>
                 </div>
-                <p class="mt-2">It fits so comfortably in my hand and I love the color. I plan on buying a second one for work!</p>
-                <p class="text-sm text-gray-600">RAYNN • 3 days ago</p>
-                <div class="divider"></div>
-            </div>
+            }
         </div>
     </div>
 </div>
-}
 
+<!-- Add JavaScript for star rating and variant selection -->
+    <script>
+        function updateStars(rating) {
+            const starContainer = document.getElementById('starContainer');
+            starContainer.innerHTML = '';
+            rating = Math.min(Math.max(parseFloat(rating) || 0, 0), 5); // Clamp between 0 and 5
+
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement('span');
+                star.classList.add('relative', 'inline-block', 'w-4', 'h-4');
+
+                if (rating >= i) {
+                    // Full star
+                    star.innerHTML = `
+                        <svg class="w-4 h-4 text-[#1F2937]" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        </svg>`;
+                } else if (rating >= i - 1 && rating < i) {
+                    // Partial star
+                    const percentage = (rating - (i - 1)) * 100;
+                    star.innerHTML = `
+                        <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        </svg>
+                        <svg class="w-4 h-4 text-[#1F2937] absolute top-0 left-0" fill="currentColor" viewBox="0 0 24 24" style="clip-path: inset(0 ${100 - percentage}% 0 0);">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        </svg>`;
+                } else {
+                    // Empty star
+                    star.innerHTML = `
+                        <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        </svg>`;
+                }
+                starContainer.appendChild(star);
+            }
+        }
+
+        // Initialize stars with the average rating from the model
+        updateStars(@Model.Review.AverageRating);
+
+        // Existing variant selection logic
+        document.getElementById('variant-select').addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            const stock = selectedOption.getAttribute('data-stock');
+            const attributes = JSON.parse(selectedOption.getAttribute('data-attributes') || '[]');
+
+            document.getElementById('variant-price').textContent = price;
+
+            const stockElement = document.getElementById('variant-stock');
+            stockElement.textContent = stock;
+            stockElement.className = 'underline' + (stock <= 5 ? ' text-red-500' : ' text-[#337A21]');
+
+            const specsElement = document.getElementById('variant-specs');
+            specsElement.innerHTML = '';
+            if (attributes.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = 'No specifications available';
+                li.className = 'text-gray-500';
+                specsElement.appendChild(li);
+            } else {
+                attributes.forEach(attr => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center gap-2 text-gray-700';
+                    li.innerHTML = `<span class="text-green-500">+</span> ${attr.Name} : ${attr.Value}`;
+                    specsElement.appendChild(li);
+                });
+            }
+        });
+    </script>

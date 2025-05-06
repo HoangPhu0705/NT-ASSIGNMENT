@@ -206,11 +206,11 @@ const ProductForm: React.FC = () => {
       if (isEditMode) {
         await axiosInstance.patch(`/product/${id}`, requestBody);
         toast.success("Product updated successfully");
+        window.location.reload();
       } else {
         await axiosInstance.post("/product", requestBody);
         toast.success("Product created successfully");
       }
-      window.location.reload();
     } catch (err: any) {
       toast.error(err.message || "Error saving product");
     } finally {

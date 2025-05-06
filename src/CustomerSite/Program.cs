@@ -22,6 +22,8 @@ namespace CustomerSite
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<CategoryService>();
             builder.Services.AddScoped<ProductService>();
+            builder.Services.AddScoped<ReviewService>();
+
             builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 
             builder.Services.AddHttpClient("NextechApi", (sp, client) =>

@@ -1,7 +1,9 @@
 using AutoMapper;
 using Domain.Entities;
+using SharedViewModels.Cart;
 using SharedViewModels.Category;
 using SharedViewModels.Product;
+using SharedViewModels.Review;
 
 namespace Application.Mappings;
 
@@ -17,9 +19,9 @@ public class MappingProfile : Profile
                 src.ProductVariantAttributes != null && src.ProductVariantAttributes.Any()
                     ? src.ProductVariantAttributes.SelectMany(pva => pva.Values.Select(v => v.Value)).Distinct()
                     : new List<string>()));
-        
-        
-        // Product
+
+
+        #region Product
         CreateMap<Product, ProductDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null));
 
@@ -56,6 +58,28 @@ public class MappingProfile : Profile
         
         CreateMap<UpdateProductImageRequest, ProductImage>()
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+        #endregion 
+        
+        #region Cart
+        // In MappingProfile.cs
+        CreateMap<Cart, CartItemDto>()
+            .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+            .ForMember(dest => dest.VariantName, opt => opt.MapFrom(src => src.ProductVariant.Name))
+            .ForMember(dest => dest.VariantId, opt => opt.MapFrom(src => src.ProductVariantId))
+            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => 
+                src.Product.Images.FirstOrDefault(i => i.IsPrimary).ImageUrl));
+        #endregion
+
+        #region Review
+        CreateMap<ProductReview, ReviewDto>()
+            .ForMember(dest => dest.UserName, opt => 
+                opt.MapFrom(src => $"{src.User.FirstName} {src.User.LastName}"))
+            .ForMember(dest => dest.UserProfilePicture, opt => 
+                opt.MapFrom(src => src.User.ProfilePicture))
+            .ForMember(dest => dest.ProductName, opt => 
+                opt.MapFrom(src => src.Product.Name));        
+
+        #endregion
     }
     
 }

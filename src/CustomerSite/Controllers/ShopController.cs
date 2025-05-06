@@ -8,11 +8,13 @@ public class ShopController : Controller
 {
     private readonly CategoryService _categoryService;
     private readonly ProductService _productService;
+    private readonly ReviewService _reviewService;
 
-    public ShopController(CategoryService categoryService, ProductService productService)
+    public ShopController(CategoryService categoryService, ProductService productService, ReviewService reviewService)
     {
         _categoryService = categoryService;
         _productService = productService;
+        _reviewService = reviewService;
     }
     
     public async Task<IActionResult> Index()
@@ -40,7 +42,13 @@ public class ShopController : Controller
     public async Task<IActionResult> ProductDetail(Guid productId)
     {
         var productResponse = await _productService.GetProductDetail(productId);
-        return View(productResponse.Data);
+        var reviewResponse = await _reviewService.GetReviewsByProductId(productId);
+        var viewModel = new ProductDetailModel()
+        {
+            Product = productResponse.Data,
+            Review = reviewResponse.Data
+        };
+        return View(viewModel);
     }
     
 }

@@ -14,10 +14,11 @@ namespace CustomerSite.Controllers
         {
             _categoryService = categoryService;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {   
-            
-            return View(User);
+            var response = await _categoryService.GetCategoriesAsync();
+
+            return View(response.Data);
         }
     }
 }
