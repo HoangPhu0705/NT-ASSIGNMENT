@@ -39,8 +39,30 @@ public class ProductService : IProductService
     {
         var product = _mapper.Map<Domain.Entities.Product>(request);
         product.Id = Guid.NewGuid();
-            
+
+        foreach (var variant in product.Variants)
+        {
+            variant.Id = Guid.NewGuid();
+            variant.ProductId = product.Id;
+        }
+
         var createdProduct = await _productRepository.AddAsync(product);
+
+        if (request.Variants != null && request.Variants.Any())
+        {
+            foreach (var requestVariant in request.Variants)
+            {
+                if (requestVariant.Attributes != null && requestVariant.Attributes.Any())
+                {
+                    var savedVariant = createdProduct.Variants.FirstOrDefault(v => v.Name == requestVariant.Name);
+                    if (savedVariant != null)
+                    {
+                        await _productRepository.AddVariantAttributesAsync(savedVariant, requestVariant.Attributes);
+                    }
+                }
+            }
+        }
+
         var productWithDetails = await _productRepository.GetByIdAsync(createdProduct.Id);
         var productDto = _mapper.Map<ProductDetailDto>(productWithDetails);
 

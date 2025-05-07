@@ -73,7 +73,7 @@ namespace Application.Services.Review
                 Rating = request.Rating,
                 ReviewText = request.ReviewText,
                 ReviewDate = DateTime.UtcNow,
-                IsApproved = true // You might want to change this based on your moderation policy
+                IsApproved = true
             };
 
             var createdReview = await _reviewRepository.AddAsync(review);

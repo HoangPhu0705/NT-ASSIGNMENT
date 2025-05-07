@@ -186,22 +186,23 @@
                 <div class="modal-box w-25 bg-[#F2F2F2]">
                     <h3 class="font-bold text-lg mb-4">Write Your Review</h3>
 
-                    <form id="review-form" class="space-y-4">
-                        <input type="hidden" id="productId" value="@Model.Product.Id" />
+                    <form asp-controller="Shop" asp-action="SubmitReview" method="post" class="space-y-4">
+                        <input type="hidden" name="ProductId" value="@Model.Product.Id" />
 
                         <div>
                             <label class="block text-sm font-medium mb-2">Rating</label>
                             <div class="rating rating-lg">
                                 @for (int i = 1; i <= 5; i++)
                                 {
-                                    <input type="radio" name="rating" value="@i" class="mask mask-star-2 bg-[#1F2937]" @(i == 5 ? "checked" : "") />
+                                    <input type="radio" name="Rating" value="@i" class="mask mask-star-2 bg-[#1F2937]" @(i == 5 ? "checked" : "") />
                                 }
                             </div>
                         </div>
 
                         <div>
-                            <label for="review-text" class="block text-sm font-medium mb-2">Your Review</label>
-                            <textarea id="review-text" class="textarea textarea-bordered w-full h-32" placeholder="Share your experience with this product..."></textarea>
+                            <label for="ReviewText" class="block text-sm font-medium mb-2">Your Review</label>
+                            <textarea id="ReviewText" name="ReviewText" class="textarea textarea-bordered w-full h-32" 
+                          placeholder="Share your experience with this product..."></textarea>
                         </div>
 
                         <div class="modal-action">

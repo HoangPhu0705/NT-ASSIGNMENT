@@ -36,14 +36,18 @@ public class ReviewService
     }
     
     //Create reviews 
-    public async Task<ApiResponse<ReviewDto>> CreateReview(CreateReviewRequest request)
+    public async Task<ApiResponse<ReviewDto>> CreateReview(CreateReviewRequest request, string accessToken)
     {
+        _httpClient.DefaultRequestHeaders.Authorization = 
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+    
         var response = await _httpClient.PostAsJsonAsync("api/review", request);
+    
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadFromJsonAsync<ApiResponse<ReviewDto>>();
         }
-        
+    
         string errorMessage = "Failed to create review.";
         try
         {

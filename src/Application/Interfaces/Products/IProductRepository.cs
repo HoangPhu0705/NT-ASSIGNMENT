@@ -16,4 +16,6 @@ public interface IProductRepository
     Task DeleteProductImagesAsync(IEnumerable<Guid> imageIds);
     Task DeleteProductVariantsAsync(IEnumerable<Guid> variantIds);
     Task UpdateVariantAttributesAsync(ProductVariant variant, IEnumerable<UpdateVariantAttributeRequest> attributes);
+    Task AddVariantAttributesAsync(ProductVariant variant, IEnumerable<CreateVariantAttributeRequest> attributes);
+
 }

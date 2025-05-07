@@ -152,7 +152,7 @@ namespace API
     
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer eyJhbGciOiJIUzI1NiIsInR5...\"",
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer <Access Token>...\"",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,

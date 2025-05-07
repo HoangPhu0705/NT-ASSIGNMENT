@@ -281,6 +281,19 @@ const ProductForm: React.FC = () => {
           >
             Cancel
           </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              console.info(
+                "Test request body:",
+                JSON.stringify(product, null, 2)
+              );
+            }}
+            disabled={isLoading || uploading}
+          >
+            Test request
+          </Button>
         </div>
       </form>
     </div>

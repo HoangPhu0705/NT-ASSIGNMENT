@@ -1,6 +1,9 @@
 using CustomerSite.Models;
 using CustomerSite.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc;
+using SharedViewModels.Review;
 
 namespace CustomerSite.Controllers;
 
@@ -20,6 +23,12 @@ public class ShopController : Controller
     public async Task<IActionResult> Index()
     {
         var response = await _categoryService.GetCategoriesAsync();
+        if (!response.Succeeded)
+        {
+            TempData["ErrorMessage"] = response.Message;
+            return RedirectToAction("Index", "Home");
+        }
+        
         return View(response.Data);
     }
 
@@ -28,7 +37,13 @@ public class ShopController : Controller
     {
         var categoryResponse = await _categoryService.GetCategoryByIdAsync(categoryId);
         var productsResponse = await _productService.GetProductsByCategory(categoryId);
-    
+        
+        if (!categoryResponse.Succeeded || !productsResponse.Succeeded)
+        {
+            TempData["ErrorMessage"] = categoryResponse.Message;
+            return RedirectToAction("Index");
+        }
+        
         var viewModel = new ShopViewModel()
         {
             Category = categoryResponse.Data,
@@ -50,5 +65,28 @@ public class ShopController : Controller
         };
         return View(viewModel);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> SubmitReview(CreateReviewRequest request)
+    {
+        if (!User.Identity.IsAuthenticated)
+        {
+            return Unauthorized();
+        }
+        string accessToken = await HttpContext.GetTokenAsync(
+            OpenIdConnectDefaults.AuthenticationScheme, "access_token");
+
+        var response = await _reviewService.CreateReview(request, accessToken);
     
+        if (response.Succeeded)
+        {
+            return RedirectToAction("ProductDetail", new { productId = request.ProductId });
+        }
+    
+        TempData["ErrorMessage"] = response.Message;
+        return RedirectToAction("ProductDetail", new { productId = request.ProductId });
+    }
+
+    
+
 }

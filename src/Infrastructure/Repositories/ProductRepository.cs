@@ -235,5 +235,54 @@ namespace Infrastructure.Repositories
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task AddVariantAttributesAsync(ProductVariant variant, IEnumerable<CreateVariantAttributeRequest> attributes)
+        {
+            // We need to get the categoryId directly from the context
+            var product = await _context.Products.FindAsync(variant.ProductId);
+            if (product == null) throw new Exception("Product not found");
+    
+            Guid categoryId = product.CategoryId;
+    
+            foreach (var attr in attributes)
+            {
+                // Find or create the category attribute
+                var categoryAttribute = await _context.CategoryAttributes
+                    .FirstOrDefaultAsync(ca => ca.Name == attr.Name && ca.CategoryId == categoryId);
+
+                if (categoryAttribute == null)
+                {
+                    categoryAttribute = new CategoryAttribute
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = attr.Name,
+                        CategoryId = categoryId
+                    };
+                    _context.CategoryAttributes.Add(categoryAttribute);
+                    await _context.SaveChangesAsync(); // Save to get the ID
+                }
+
+                var productVariantAttribute = new ProductVariantAttribute
+                {
+                    Id = Guid.NewGuid(),
+                    CategoryAttributeId = categoryAttribute.Id,
+                    ProductId = variant.ProductId // Set the ProductId explicitly
+                };
+                _context.ProductVariantAttributes.Add(productVariantAttribute);
+                await _context.SaveChangesAsync(); 
+
+                // Create variant attribute value
+                var attributeValue = new VariantAttributeValue
+                {
+                    Name = attr.Name,
+                    Value = attr.Value,
+                    ProductVariantAttributeId = productVariantAttribute.Id,
+                    ProductVariantId = variant.Id
+                };
+                _context.VariantAttributeValues.Add(attributeValue);
+            }
+
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -14,8 +14,8 @@ namespace Domain.Entities
         public Guid CategoryId { get; set; }
         public required string Name { get; set; }
         public string? Description { get; set; }
+        
         public bool IsParent { get; set; } = true;
-    
         public Category Category { get; set; }
         public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
