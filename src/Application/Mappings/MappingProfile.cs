@@ -66,6 +66,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
             .ForMember(dest => dest.VariantName, opt => opt.MapFrom(src => src.ProductVariant.Name))
             .ForMember(dest => dest.VariantId, opt => opt.MapFrom(src => src.ProductVariantId))
+            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.ProductVariant.Price))
             .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => 
                 src.Product.Images.FirstOrDefault(i => i.IsPrimary).ImageUrl));
         #endregion

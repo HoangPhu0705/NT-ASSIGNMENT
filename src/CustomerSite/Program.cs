@@ -22,6 +22,7 @@ namespace CustomerSite
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<CategoryService>();
             builder.Services.AddScoped<ProductService>();
+            builder.Services.AddScoped<CartService>();
             builder.Services.AddScoped<ReviewService>();
 
             builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
@@ -82,13 +83,12 @@ namespace CustomerSite
 
                 options.GetClaimsFromUserInfoEndpoint = true;
 
-                // // Map the claims from token to user identity
+                // Map the claims from token to user identity
                 options.ClaimActions.MapJsonKey("first_name", "first_name");
                 options.ClaimActions.MapJsonKey("last_name", "last_name");
                 options.ClaimActions.MapJsonKey("email", "email");
                 options.ClaimActions.MapUniqueJsonKey("role", "role");
                 
-                // Set standard name and role claim types
                 options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
                     NameClaimType = "name",

@@ -25,7 +25,7 @@ namespace Application.Services.Carts
             var cartDto = new CartDto
             {
                 Id = Guid.NewGuid(), // Virtual cart ID
-                Items = cartItemDtos
+                Items = cartItemDtos,
             };
 
             return ApiResponse<CartDto>.Success(cartDto);

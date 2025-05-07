@@ -20,7 +20,7 @@
 <div class="flex-grow relative">
     @* Shop Menu hidden by default, positioned absolutely *@
     <div id="shop-menu" class="w-screen absolute top-[-10px] left-0 z-50 bg-[#F4F4F4] px-48 py-12 overflow-hidden hidden h-[55vh]">
-         @* Shop By Category and Shop By Interest content *@
+        @* Shop By Category and Shop By Interest content *@
         <div class="flex">
             <div class="w-2/3 flex flex-col">
                 <h2 class="text-xl font-semibold mb-4 pl-12">Shop by Category</h2>
@@ -28,27 +28,27 @@
                     @* Popular Categories *@
                     <div class="w-2/3 grid grid-cols-3 grid-rows-2 gap-4 p-4">
                         <vc:category-card
-                            href="/products"
+                            href="/"
                             category-name="Mice"
                             image-url="https://resource.logitech.com/w_140,h_140,ar_1,c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/navigation/logi/mice-2.png">
                         </vc:category-card>
                         <vc:category-card
-                            href="/products"
+                            href="/"
                             category-name="Keyboards"
                             image-url="https://resource.logitech.com/w_140,h_140,ar_1,c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/navigation/logi/keyboards-2.png">
                         </vc:category-card>
                         <vc:category-card
-                            href="/products"
+                            href="/"
                             category-name="Webcams"
                             image-url="https://resource.logitech.com/w_140,h_140,ar_1,c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/navigation/logi/webcams-2.png">
                         </vc:category-card>
                         <vc:category-card
-                            href="/products"
+                            href="/"
                             category-name="Headsets & Earbuds"
                             image-url="https://resource.logitech.com/w_140,h_140,ar_1,c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/navigation/logi/headsets-earbuds-2.png">
                         </vc:category-card>
                         <vc:category-card
-                            href="/products"
+                            href="/"
                             category-name="iPad Keyboard Cases"
                             image-url="https://resource.logitech.com/w_140,h_140,ar_1,c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/navigation/logi/mobile-devices-2.png">
                         </vc:category-card>
@@ -98,6 +98,11 @@
     <main role="main" class="pb-3">
         @RenderBody()
     </main>
+</div>
+<div id="toast-notification" class="toast hidden transform transition-all duration-300 z-50">
+    <div class="alert alert-info bg-[#00FDCF]">
+        <span id="toast-message">Item added to cart!</span>
+    </div>
 </div>
 <footer class="footer bg-base-200 text-base-content p-10">
     <aside>

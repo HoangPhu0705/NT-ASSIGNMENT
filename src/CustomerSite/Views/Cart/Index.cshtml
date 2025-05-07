@@ -1,4 +1,4 @@
-
+@model SharedViewModels.Cart.CartDto
 @{
 }
 
@@ -13,92 +13,123 @@
         <div class="flex-1">
             <h1 class="text-2xl font-bold mb-4">Cart</h1>
 
-            <!-- Item 1 -->
-            <div class="bg-white rounded-lg p-4 flex items-center mb-4">
-                <img src="https://via.placeholder.com/80" alt="USB Unifying Receiver" class="w-20 h-20 mr-4">
-                <div class="flex-1">
-                    <h2 class="text-lg font-semibold">USB Unifying Receiver</h2>
-                    <p class="text-sm text-green-600">In Stock</p>
-                    <div class="flex items-center mt-2">
-                        <button class="border px-2">-</button>
-                        <span class="border px-4">1</span>
-                        <button class="border px-2">+</button>
-                    </div>
+            @if (Model?.Items == null || !Model.Items.Any())
+            {
+                <div class="bg-white rounded-lg p-8 flex flex-col items-center justify-center">
+                    <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <h2 class="text-xl font-semibold mb-2">Your cart is empty</h2>
+                    <p class="text-gray-500 mb-6">Looks like you haven't added anything to your cart yet.</p>
+                    <a href="/shop" class="bg-black text-white px-6 py-2 rounded-full mt-2">EXPLORE PRODUCTS</a>
                 </div>
-                <div class="text-right">
-                    <p class="text-lg font-semibold">$11.99</p>
-                    <p class="text-sm line-through text-gray-500">$14.99</p>
-                    <div class="flex gap-2 mt-2">
-                        <button class="text-sm text-gray-600 hover:underline">Remove</button>
-                        <button class="text-sm text-gray-600 hover:underline">Move to Wishlist</button>
+            }
+            else
+            {
+                @foreach (var item in Model.Items)
+                {
+                    <div class="bg-white rounded-lg p-4 flex items-center mb-4">
+                        <img src="@item.ImageUrl" alt="@item.ProductName" class="w-20 h-20 mr-4 object-cover">
+                        <div class="flex-1">
+                            <h2 class="text-lg font-semibold">@item.ProductName</h2>
+                            <p class="text-sm text-gray-600">@item.VariantName</p>
+                            <p class="text-sm text-green-600">In Stock</p>
+                            <div class="flex items-center mt-2">
+                                <button class="border px-2 py-1" onclick="updateQuantity('@item.Id', @(item.Quantity-1))">-</button>
+                                <span class="border px-4 py-1">@item.Quantity</span>
+                                <button class="border px-2 py-1" onclick="updateQuantity('@item.Id', @(item.Quantity+1))">+</button>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-semibold">$@item.Price.ToString("0.00")</p>
+                            <div class="flex gap-2 mt-2">
+                                <button class="text-sm text-gray-600 hover:underline" onclick="removeItem('@item.Id')">Remove</button>
+                                <button class="text-sm text-gray-600 hover:underline">Move to Wishlist</button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div class="bg-white rounded-lg p-4 flex items-center">
-                <img src="https://via.placeholder.com/80" alt="M340 Collection" class="w-20 h-20 mr-4">
-                <div class="flex-1">
-                    <h2 class="text-lg font-semibold">M340 Collection</h2>
-                    <p class="text-sm text-gray-600">Speckles</p>
-                    <p class="text-sm text-green-600">In Stock</p>
-                    <div class="flex items-center mt-2">
-                        <button class="border px-2">-</button>
-                        <span class="border px-4">1</span>
-                        <button class="border px-2">+</button>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-lg font-semibold">$18.99</p>
-                    <p class="text-sm line-through text-gray-500">$22.99</p>
-                    <div class="flex gap-2 mt-2">
-                        <button class="text-sm text-gray-600 hover:underline">Remove</button>
-                        <button class="text-sm text-gray-600 hover:underline">Move to Wishlist</button>
-                    </div>
-                </div>
-            </div>
+                }
+            }
         </div>
 
         <!-- Summary Section -->
         <div class="w-1/3">
             <div class="bg-white rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold">Summary (2)</h2>
-                    <a href="#" class="text-sm text-gray-600 hover:underline">Enter your promo code</a>
+                <h2 class="text-lg font-bold mb-4">Summary</h2>
+
+                <div class="flex justify-between mb-2">
+                    <span>Subtotal (@Model?.TotalItems items)</span>
+                    <span>$@(Model?.Items?.Sum(i => i.Price * i.Quantity).ToString("0.00") ?? "0.00")</span>
                 </div>
-                <div class="flex items-center mb-4">
-                    <input type="text" placeholder="Promo code" class="border rounded-l-lg p-2 flex-1">
-                    <button class="bg-black text-white rounded-r-lg px-4 py-2">SUBMIT</button>
+                <div class="flex justify-between mb-2">
+                    <span>Shipping</span>
+                    <span>Free</span>
                 </div>
-                <div class="border-t pt-4">
-                    <div class="flex justify-between mb-2">
-                        <span>Subtotal</span>
-                        <span>$37.98</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span>Estimated Shipping</span>
-                        <span>Free - STD</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span>Estimated Tax</span>
-                        <span>-</span>
-                    </div>
-                    <div class="flex justify-between text-red-600 mb-2">
-                        <span>Total Savings</span>
-                        <span>-$7.60</span>
-                    </div>
-                    <div class="flex justify-between text-lg font-semibold mt-4">
+                <div class="flex justify-between mb-2">
+                    <span>Tax</span>
+                    <span>Calculated at checkout</span>
+                </div>
+
+                <div class="border-t mt-4 pt-4">
+                    <div class="flex justify-between font-bold">
                         <span>Total</span>
-                        <span>$30.38</span>
+                        <span>$@(Model?.Items?.Sum(i => i.Price * i.Quantity).ToString("0.00") ?? "0.00")</span>
                     </div>
                 </div>
+
                 <p class="text-sm text-gray-600 mt-4">
-                    4 payments at 0% interest with Klarna
-                    <a href="#" class="underline">Learn more</a>
+                    Shipping options will be available during checkout.
                 </p>
-                <button class="bg-[#00C4B4] text-white w-full py-3 rounded-full mt-4">CONTINUE TO CHECKOUT</button>
-                
+
+                @if (Model?.Items?.Any() == true)
+                {
+                    <button class="bg-[#00C4B4] text-white w-full py-3 rounded-full mt-4">CONTINUE TO CHECKOUT</button>
+                }
+                else
+                {
+                    <button disabled class="bg-gray-300 text-gray-500 w-full py-3 rounded-full mt-4 cursor-not-allowed">CONTINUE TO CHECKOUT</button>
+                }
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function updateQuantity(itemId, quantity) {
+        if (quantity <= 0) {
+            return;
+        }
+        fetch('/Cart/UpdateCartItem', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                cartItemId: itemId,
+                quantity: quantity
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        })
+        .catch(error => console.error('Error updating cart item:', error));
+    }
+    
+    function removeItem(itemId) {
+        console.info('Removing item with ID:', itemId);
+        fetch('/Cart/RemoveCartItem?itemId=' + itemId, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        })
+        .catch(error => console.error('Error removing cart item:', error));
+    }
+</script>
