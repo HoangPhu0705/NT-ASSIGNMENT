@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import {
   Input,
@@ -92,20 +93,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
           placeholder="Enter product description"
         />
       </div>
-
-      {/* Category */}
-
-      {/* Is Parent */}
-      {/* <div className="flex items-center space-x-2">
-        <Checkbox
-          id="isParent"
-          checked={product.isParent}
-          onCheckedChange={(checked) => onChange("isParent", !!checked)}
-        />
-        <Label className="mb-2" htmlFor="isParent">
-          Is Parent Product
-        </Label>
-      </div> */}
     </div>
   );
 };

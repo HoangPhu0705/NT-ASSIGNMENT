@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect } from "react";
 import {
   Card,
-  CardHeader,
-  CardTitle,
   CardContent,
   Button,
   Label,
@@ -50,46 +49,59 @@ const VariantForm: React.FC<VariantFormProps> = ({
   onChange,
   onRemove,
 }) => {
-  const [priceInput, setPriceInput] = useState<string>();
+  const [priceInput, setPriceInput] = useState<string>("");
+  const [stockInput, setStockInput] = useState<string>("");
 
-  const validateAndParsePrice = (value: string): number => {
-    if (value === "") return 0;
-    const regex = /^\d+(\.\d{1,2})?$/; // Matches 99, 99.9, 99.99
-    if (regex.test(value)) {
-      return parseFloat(value);
+  useEffect(() => {
+    setPriceInput(variant.price === 0 ? "" : variant.price.toString());
+    setStockInput(variant.stock === 0 ? "" : variant.stock.toString());
+  }, [variant.price, variant.stock]);
+
+  const parseNumber = (value: string): number => {
+    const cleanedValue = value
+      .replace(/[^0-9.]/g, "")
+      .replace(/(\..*)\./g, "$1");
+    if (cleanedValue === "" || isNaN(parseFloat(cleanedValue))) {
+      return 0;
     }
-    return NaN; // Invalid input
+    return parseFloat(parseFloat(cleanedValue).toFixed(2));
   };
 
-  const handleChange = (field: keyof Variant, value: any) => {
+  const isValidInput = (value: string): boolean => {
+    return /^[0-9]*\.?[0-9]*$/.test(value);
+  };
+
+  const handleChange = (field: keyof Variant, value: string) => {
     if (field === "price") {
-      const permissiveRegex = /^\d*(\.\d{0,2})?$/; // Allows 99, 99., 99.9, 99.99
-      if (value === "" || permissiveRegex.test(value)) {
+      if (isValidInput(value)) {
         setPriceInput(value);
-        const parsedValue = validateAndParsePrice(value);
-        if (!isNaN(parsedValue)) {
-          onChange({ ...variant, [field]: parsedValue });
-        }
+        const parsedValue = parseNumber(value);
+        onChange({ ...variant, price: parsedValue });
       }
     } else if (field === "stock") {
-      const parsedValue = Number(value);
-      if (
-        !isNaN(parsedValue) &&
-        parsedValue >= 0 &&
-        Number.isInteger(parsedValue)
-      ) {
-        onChange({ ...variant, [field]: parsedValue });
+      if (isValidInput(value)) {
+        setStockInput(value);
+        const parsedValue = parseNumber(value);
+        onChange({ ...variant, stock: parsedValue });
       }
     } else {
       onChange({ ...variant, [field]: value });
     }
   };
 
-  const handlePriceBlur = () => {
-    const parsedValue = validateAndParsePrice(priceInput);
-    const finalValue = isNaN(parsedValue) ? 0 : parsedValue;
-    onChange({ ...variant, price: finalValue });
-    setPriceInput(finalValue === 0 ? "" : finalValue.toString());
+  const handleBlur = (field: "price" | "stock") => {
+    const inputValue = field === "price" ? priceInput : stockInput;
+    const parsedValue = parseNumber(inputValue);
+    const displayValue = inputValue
+      .replace(/[^0-9.]/g, "")
+      .replace(/(\..*)\./g, "$1");
+    if (field === "price") {
+      onChange({ ...variant, price: parsedValue });
+      setPriceInput(displayValue === "" ? "" : displayValue);
+    } else {
+      onChange({ ...variant, stock: parsedValue });
+      setStockInput(displayValue === "" ? "" : displayValue);
+    }
   };
 
   const handleAttributesChange = (attributes: VariantAttribute[]) => {
@@ -104,7 +116,7 @@ const VariantForm: React.FC<VariantFormProps> = ({
         );
         if (response.data.code === 200) {
           toast.success("Variant removed successfully");
-          onRemove(); // Update local state
+          onRemove();
         } else {
           toast.error("Failed to remove variant");
         }
@@ -112,7 +124,6 @@ const VariantForm: React.FC<VariantFormProps> = ({
         toast.error(err.message || "Error removing variant");
       }
     } else {
-      // In add mode or if variant.id is missing, remove locally
       onRemove();
     }
   };
@@ -120,7 +131,9 @@ const VariantForm: React.FC<VariantFormProps> = ({
   return (
     <AccordionItem value={`variant-${index}`}>
       <Card className="mt-4 px-4 py-2 text-lg hover:cursor-pointer">
-        <AccordionTrigger>{variant.name}</AccordionTrigger>
+        <AccordionTrigger>
+          {variant.name || `Variant ${index + 1}`}
+        </AccordionTrigger>
         <AccordionContent>
           <CardContent className="space-y-4">
             <div>
@@ -154,11 +167,10 @@ const VariantForm: React.FC<VariantFormProps> = ({
               <Input
                 id={`variant-price-${index}`}
                 type="text"
-                value={variant.price.toString()}
+                value={priceInput}
                 onChange={(e) => handleChange("price", e.target.value)}
-                onBlur={handlePriceBlur}
+                onBlur={() => handleBlur("price")}
                 placeholder="Enter price (e.g., 99.99)"
-                pattern="^\d+(\.\d{1,2})?$"
                 disabled={isLoading}
               />
             </div>
@@ -168,11 +180,11 @@ const VariantForm: React.FC<VariantFormProps> = ({
               </Label>
               <Input
                 id={`variant-stock-${index}`}
-                type="number"
-                value={variant.stock}
+                type="text"
+                value={stockInput}
                 onChange={(e) => handleChange("stock", e.target.value)}
-                placeholder="Enter stock (e.g., 100)"
-                min="0"
+                onBlur={() => handleBlur("stock")}
+                placeholder="Enter stock (e.g., 100.50)"
                 disabled={isLoading}
               />
             </div>
@@ -182,6 +194,7 @@ const VariantForm: React.FC<VariantFormProps> = ({
               onAttributesChange={handleAttributesChange}
             />
             <Button
+              type="button"
               variant="destructive"
               size="sm"
               onClick={handleRemove}

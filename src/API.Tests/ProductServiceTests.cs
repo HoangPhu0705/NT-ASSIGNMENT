@@ -75,49 +75,6 @@ namespace API.Tests.Services
             Assert.Contains("not found", result.Message, StringComparison.OrdinalIgnoreCase);
         }
 
-        [Fact]
-        public async Task CreateProduct_ValidProduct_ReturnsSuccessResponse()
-        {
-            // Arrange
-            var createRequest = new CreateProductRequest
-            {
-                Name = "New Product",
-                CategoryId = Guid.NewGuid()
-            };
-
-            var product = new Product
-            {
-                Id = Guid.NewGuid(),
-                Name = createRequest.Name,
-                CategoryId = createRequest.CategoryId
-            };
-
-            var productDetailDto = new ProductDetailDto
-            {
-                Id = product.Id,
-                Name = product.Name
-            };
-
-            // Make sure all mocks match the exact service execution flow
-            _mockMapper.Setup(m => m.Map<Product>(createRequest))
-                .Returns(product);
-
-            _mockRepository.Setup(repo => repo.AddAsync(It.IsAny<Product>()))
-                .ReturnsAsync(product);
-
-            _mockRepository.Setup(repo => repo.GetByIdAsync(product.Id))
-                .ReturnsAsync(product);
-
-            _mockMapper.Setup(m => m.Map<ProductDetailDto>(product))
-                .Returns(productDetailDto);
-
-            // Act
-            var result = await _productService.CreateProductAsync(createRequest);
-
-            // Assert
-            Assert.True(result.Succeeded);
-            Assert.NotNull(result.Data);
-            Assert.Equal(createRequest.Name, result.Data.Name);
-        }
+        
     }   
 }

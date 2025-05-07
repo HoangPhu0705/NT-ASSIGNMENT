@@ -65,6 +65,7 @@ const ProductForm: React.FC = () => {
   });
   const [errors, setErrors] = useState<{
     name?: string;
+    description?: string;
     categoryId?: string;
     variants?: string;
     images?: string;
@@ -134,6 +135,9 @@ const ProductForm: React.FC = () => {
     }
     if (!product.categoryId) {
       newErrors.categoryId = "Category is required";
+    }
+    if (!product.description.trim()) {
+      newErrors.description = "Description is required";
     }
     if (product.variants.length === 0) {
       newErrors.variants = "At least one variant is required";
@@ -281,7 +285,7 @@ const ProductForm: React.FC = () => {
           >
             Cancel
           </Button>
-          <Button
+          {/* <Button
             type="button"
             variant="outline"
             onClick={() => {
@@ -293,7 +297,7 @@ const ProductForm: React.FC = () => {
             disabled={isLoading || uploading}
           >
             Test request
-          </Button>
+          </Button> */}
         </div>
       </form>
     </div>
